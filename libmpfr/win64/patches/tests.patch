@@ -1,0 +1,269 @@
+--- gmp-mpfr/mpfr-4.2.2/tests/mpf_compat.h	2026-06-08 01:49:56.929573500 +0200
++++ libmpfr/tests/mpf_compat.h	2026-06-08 01:46:58.548259200 +0200
+@@ -26,6 +26,9 @@
+ int
+ main (void)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+ 
+ #if defined (MPFR) && _MPFR_EXP_FORMAT != 3 /* because exp is a long below */
+ 
+@@ -247,4 +250,5 @@
+ 
+ #endif
+ 
++#endif
+ }
+--- gmp-mpfr/mpfr-4.2.2/tests/tadd.c	2026-06-08 01:49:57.032136700 +0200
++++ libmpfr/tests/tadd.c	2026-06-08 01:46:58.679760900 +0200
+@@ -19,12 +19,12 @@
+ along with the GNU MPFR Library; see the file COPYING.LESSER.
+ If not, see <https://www.gnu.org/licenses/>. */
+ 
+-#define N 30000
+-
+ #include <float.h>
+ 
+ #include "mpfr-test.h"
+ 
++#define N 30000
++
+ /* If the precisions are the same, we want to test both mpfr_add1sp
+    and mpfr_add1. */
+ 
+--- gmp-mpfr/mpfr-4.2.2/tests/tests.c	2026-06-08 01:49:57.806972500 +0200
++++ libmpfr/tests/tests.c	2026-06-08 01:46:59.360437900 +0200
+@@ -44,7 +44,11 @@
+ #endif
+ 
+ #ifdef HAVE_GETTIMEOFDAY
++#ifdef _WIN64
++#include <unistd.h>
++#else
+ # include <sys/time.h>
++#endif
+ #else
+ # include <time.h>
+ #endif
+@@ -104,6 +108,25 @@
+ 
+ #endif
+ 
++#ifdef _WIN64
++
++#define WIN32_LEAN_AND_MEAN
++#include <Windows.h>
++#include <crtdbg.h>
++static _CrtMemState cms;
++static LARGE_INTEGER frequency;
++static LARGE_INTEGER start;
++static LARGE_INTEGER end;
++static double time_consumed;
++
++void my_abort(const char* file, int line)
++{
++  fprintf(stdout, "Test applet called abort() at %i in %s\n", line, file);
++  exit(125);
++}
++
++#endif
++
+ char             mpfr_rands_initialized = 0;
+ gmp_randstate_t  mpfr_rands;
+ 
+@@ -301,6 +324,24 @@
+ 
+   default_emin = mpfr_get_emin ();
+   default_emax = mpfr_get_emax ();
++
++#ifdef _WIN64
++  memset(&cms, 0, sizeof(cms));
++  _CrtMemCheckpoint(&cms);
++
++  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF);
++  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
++  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDOUT);
++  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
++
++  QueryPerformanceFrequency(&frequency);
++  QueryPerformanceCounter(&start);
++
++  _unlink("__time__consumed");
++#endif
+ }
+ 
+ void
+@@ -308,6 +349,36 @@
+ {
+   int err = 0;
+ 
++#ifdef _WIN64
++  QueryPerformanceCounter(&end);
++  time_consumed = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
++  {
++    char time_str[64];
++    FILE* f = fopen("__time__consumed", "wt");
++    if (NULL != f)
++    {
++      fprintf(f, "%I64u | ", (unsigned __int64)(end.QuadPart - start.QuadPart));
++      memset(time_str, 0x00, sizeof(time_str));
++      switch (snprintf(time_str, sizeof(time_str), "%.6f", time_consumed))
++      {
++        case 8:
++          fprintf(f, "  %s sec(s)\n", time_str);
++          break;
++        case 9:
++          fprintf(f, " %s sec(s)\n", time_str);
++          break;
++        case 10:
++          fprintf(f, "%s sec(s)\n", time_str);
++          break;
++        default:
++          fprintf(f, "  n/a      sec(s)\n");
++          break;
++      }
++      fclose(f);
++    }
++  }
++#endif
++
+   if (mpfr_get_emin () != default_emin)
+     {
+       printf ("Default emin value has not been restored!\n");
+@@ -346,6 +417,15 @@
+     }
+ #endif
+ 
++#ifdef _WIN64
++  if (!_CrtCheckMemory())
++  {
++    fprintf(stderr, "_CrtCheckMemory FAILED.\n");
++    _CrtMemDumpAllObjectsSince(&cms);
++    exit(101);
++  }
++#endif
++
+   if (err)
+     exit (err);
+ }
+--- gmp-mpfr/mpfr-4.2.2/tests/tfpif.c	2026-06-08 01:49:57.961465800 +0200
++++ libmpfr/tests/tfpif.c	2026-06-08 01:46:59.549416300 +0200
+@@ -415,6 +415,11 @@
+ int
+ main (int argc, char *argv[])
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   if (argc != 1)
+     {
+       printf ("Usage: %s\n", argv[0]);
+@@ -431,4 +436,5 @@
+   tests_end_mpfr ();
+ 
+   return 0;
++#endif
+ }
+--- gmp-mpfr/mpfr-4.2.2/tests/tfprintf.c	2026-06-08 01:49:57.995475700 +0200
++++ libmpfr/tests/tfprintf.c	2026-06-08 01:46:59.562412200 +0200
+@@ -423,6 +423,11 @@
+ int
+ main (int argc, char *argv[])
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   FILE *fout;
+   int N;
+ 
+@@ -462,6 +467,7 @@
+   fclose (fout);
+   tests_end_mpfr ();
+   return 0;
++#endif
+ }
+ 
+ #else  /* HAVE_STDARG */
+--- gmp-mpfr/mpfr-4.2.2/tests/tinp_str.c	2026-06-08 01:49:58.253002300 +0200
++++ libmpfr/tests/tinp_str.c	2026-06-08 01:46:59.844920400 +0200
+@@ -30,6 +30,11 @@
+ int
+ main (int argc, char *argv[])
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   mpfr_t x;
+   mpfr_t y;
+   FILE *f;
+@@ -124,4 +129,5 @@
+ 
+   tests_end_mpfr ();
+   return 0;
++#endif
+ }
+--- gmp-mpfr/mpfr-4.2.2/tests/tout_str.c	2026-06-08 01:49:58.567052600 +0200
++++ libmpfr/tests/tout_str.c	2026-06-08 01:47:00.201673800 +0200
+@@ -106,6 +106,11 @@
+ int
+ main (int argc, char *argv[])
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   const char *fname = "tout_str_out.txt";
+   int i, N = 10000;
+ 
+@@ -176,4 +181,5 @@
+ 
+   tests_end_mpfr ();
+   return 0;
++#endif
+ }
+--- gmp-mpfr/mpfr-4.2.2/tests/toutimpl.c	2026-06-08 01:49:58.555046200 +0200
++++ libmpfr/tests/toutimpl.c	2026-06-08 01:47:00.188669200 +0200
+@@ -46,6 +46,9 @@
+ int
+ main (void)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   mpfr_exp_t e;
+   mpfr_t x;
+   FILE *f;
+@@ -142,4 +145,5 @@
+   remove (FILE_NAME);
+   tests_end_mpfr ();
+   return 0;
++#endif
+ }
+--- gmp-mpfr/mpfr-4.2.2/tests/tsprintf.c	2026-06-08 01:49:59.092230700 +0200
++++ libmpfr/tests/tsprintf.c	2026-06-08 01:47:00.680951600 +0200
+@@ -1567,6 +1567,13 @@
+   int width, r, e;
+ };
+ 
++#if defined(_WIN64) && defined(EOVERFLOW)
++# if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++# undef EOVERFLOW
++/* I don't know why but the static runtime DOES NOT return EOVERFLOW although it is defined in errno.h on MS Windows... */
++# endif
++#endif
++
+ static void
+ check_length_overflow (void)
+ {

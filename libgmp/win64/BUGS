@@ -1,0 +1,19 @@
+2026-05-18	tuneup.exe aborts with CPU exception on ARM64 if
+		**NOT** compiled with assembly. Visual C/C++ seems
+		to violate ARM64 ABI by modifying register X23...
+
+2026-05-16	not a bug here but in armasm64.exe: 'ALIGN 16'
+		directive in CODE sections emits 0x00000000 opcodes
+		instead of NOP aka 'HINT #0x0' aka opcode 0xD503201F.
+		On ARM64/Aarch64, this is AN INVALID OPCODE and
+		crashes the assembler stuff.
+
+		Actually: all 'ALIGN 16' without 'ret' or 'b'(ranch)
+		--------- were manually replaced by one or more of
+		          the correct opcode 0xD503201F.
+
+2026-05-15	tuneup.exe exits creating MULFFT stuff; possibly
+		'long' C type (32bit in 64bit compiler) problem
+
+
+

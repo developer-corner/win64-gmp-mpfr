@@ -1,0 +1,19 @@
+--- ./mpf/dump.c	2026-06-06 17:45:11.428665300 +0200
++++ ./mpf/dump.c	2026-06-06 17:45:55.630708400 +0200
+@@ -45,8 +45,16 @@
+ 
+   str = mpf_get_str (0, &exp, 10, 0, u);
+   if (str[0] == '-')
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++    printf("-0.%se%lld\n", str + 1, exp);
++#else
+     printf ("-0.%se%ld\n", str + 1, exp);
++#endif
+   else
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++    printf("0.%se%lld\n", str, exp);
++#else
+     printf ("0.%se%ld\n", str, exp);
++#endif
+   (*__gmp_free_func) (str, strlen (str) + 1);
+ }

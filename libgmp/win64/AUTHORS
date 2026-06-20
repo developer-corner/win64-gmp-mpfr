@@ -1,0 +1,14 @@
+Authors of GNU MP MS Windows/64bit port (in chronological order of initial contribution)
+
+Ingo A. Kubbilun	
+			- conversion of all x86-64 assembler sources to ml64.exe
+			  syntax
+			- conversion of System V AMD64 ABI to MS Visual C/C++ AMD64
+			  ABI (assembler source codes)
+			- conversion of all Aarch64/ARM64 assembler sources to
+			  armasm64.exe syntax
+			- nmake Makefile
+			- module definition files for DLLs
+			- wintestrunner.c: execution and benchmarking of all tests
+			- creation of DLL version resource
+			- GNU MP source codes patches for MS Windows

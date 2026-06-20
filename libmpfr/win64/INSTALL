@@ -1,0 +1,69 @@
+Copyright 1999-2025 Free Software Foundation, Inc.
+Contributed by the Pascaline and Caramba projects, INRIA.
+
+This file is part of the GNU MPFR Library.
+
+The GNU MPFR Library is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 3 of the License, or (at your
+option) any later version.
+
+The GNU MPFR Library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with the GNU MPFR Library; see the file COPYING.LESSER.
+If not, see <https://www.gnu.org/licenses/>.
+
+
+            BUILDING AND INSTALLING GNU MPFR ON MS WINDOWS/64BIT
+            ====================================================
+
+Please also see the toplevel README.md for instructions.
+These instructions are only for the impatient.  Others should read the toplevel
+README.md for instructions.
+
+[1] What do I need?
+
+MS Visual C/C++ 2026 (possibly Community Edition - CE) installed on your
+build host. Furthermore, a GNU patch(.exe) is required. You MAY install
+GIT for Windows, which comes with a patch.exe.
+
+[2] How do I build?
+
+Enter the 'x64_x86 Native Tools Command Prompt' of MS Visual C/C++ or
+'ARM64 Native Tools Command Prompt', respectively.
+*DO NOT* use one of the 'Cross Tools Command Prompt' (e.g. ARM64 on x86-64)
+unless you want to omit the execution of the test suite (the test suite
+is only executable on the target platform!).
+
+Download the original GNU MPFR sources, as of writing this text, it is
+version 4.2.2. Untar it:
+
+tar xfJ mpfr-4.2.2.tar.xz  # you may use any Linux-type environment, e.g.
+                           # Window Linux subsystem, Cygwin, or Windows
+                           # 7-ZIP to perform this.
+
+Copy (recursively) the entire win64 folder of this contribution into the
+newly created folder mpfr-4.2.2. Enter this folder via 'cd'.
+
+--
+
+The static library build is performed by:
+
+nmake /f win64/Makefile  # builds static lib, tests, runs testsuite, builds
+                         # tuneup.exe (NO ASSEMBLY)
+
+nmake /f win64/Makefile ASSEMBLY=  # same but with assembly
+
+The dynamic library (with static import library) build is performed by:
+
+nmake /f win64/Makefile dynamic_lib check  # builds DLL and static import
+                                           # library
+
+nmake /f win64/Makefile ASSEMBLY= dynamic_lib check  # same with assembly
+
+=> NEVER USE A BUILD **WITHOUT** HAVING EXECUTED THE TESTSUITE!!!
+

@@ -1,0 +1,4467 @@
+diff -NaurbEZwB -x 'Makefile*' ./tests/memory.c ./tests/memory.c
+--- ./tests/memory.c	2026-06-06 17:45:32.447146600 +0200
++++ ./tests/memory.c	2026-06-06 17:46:04.255081600 +0200
+@@ -86,7 +86,7 @@
+   if (size == 0)
+     {
+       fprintf (stderr, "tests_allocate(): attempt to allocate 0 bytes\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   h = (struct header *) __gmp_default_allocate (sizeof (*h));
+@@ -117,7 +117,7 @@
+     {
+       fprintf (stderr, "tests_reallocate(): attempt to reallocate %p to 0 bytes\n",
+ 	       ptr);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   hp = tests_memory_find (ptr);
+@@ -125,7 +125,7 @@
+     {
+       fprintf (stderr, "tests_reallocate(): attempt to reallocate bad pointer %p\n",
+ 	       ptr);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   h = *hp;
+ 
+@@ -133,20 +133,20 @@
+     {
+       fprintf (stderr, "tests_reallocate(): bad old size %lu, should be %lu\n",
+ 	       (unsigned long) old_size, (unsigned long) h->size);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (*((mp_limb_t *) ((gmp_intptr_t) ptr - sizeof (mp_limb_t)))
+       != PATTERN1 - PTRLIMB (ptr))
+     {
+       fprintf (stderr, "in realloc: redzone clobbered before block\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   PATTERN2_var = PATTERN2 - PTRLIMB (ptr);
+   if (memcmp ((void *) ((gmp_intptr_t) ptr + h->size), &PATTERN2_var, sizeof (mp_limb_t)))
+     {
+       fprintf (stderr, "in realloc: redzone clobbered after block\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   rptr = __gmp_default_reallocate ((void *) ((gmp_intptr_t) ptr - sizeof (mp_limb_t)),
+@@ -172,7 +172,7 @@
+     {
+       fprintf (stderr, "tests_free(): attempt to free bad pointer %p\n",
+ 	       ptr);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   return hp;
+ }
+@@ -190,13 +190,13 @@
+       != PATTERN1 - PTRLIMB (ptr))
+     {
+       fprintf (stderr, "in free: redzone clobbered before block\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   PATTERN2_var = PATTERN2 - PTRLIMB (ptr);
+   if (memcmp ((void *) ((gmp_intptr_t) ptr + h->size), &PATTERN2_var, sizeof (mp_limb_t)))
+     {
+       fprintf (stderr, "in free: redzone clobbered after block\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   __gmp_default_free ((void *) ((gmp_intptr_t) ptr - sizeof(mp_limb_t)),
+@@ -214,7 +214,7 @@
+     {
+       fprintf (stderr, "tests_free(): bad size %lu, should be %lu\n",
+ 	       (unsigned long) size, (unsigned long) h->size);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   tests_free_nosize (ptr);
+@@ -241,6 +241,6 @@
+ 	count++;
+ 
+       fprintf (stderr, "    %u blocks remaining\n", count);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/misc/t-locale.c ./tests/misc/t-locale.c
+--- ./tests/misc/t-locale.c	2026-06-06 17:45:32.493654700 +0200
++++ ./tests/misc/t-locale.c	2026-06-06 17:46:04.268088900 +0200
+@@ -129,7 +129,7 @@
+                   printf ("mpf_set_str error\n");
+                   printf ("  point  %s\n", decimal_point);
+                   printf ("  str    %s\n", str);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+               if (mpf_cmp_d (f, d) != 0)
+                 {
+@@ -138,7 +138,7 @@
+                   printf    ("  str    %s\n", str);
+                   mpf_trace ("  f", f);
+                   printf    ("  d=%g\n", d);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+ 
+               mpf_set_d (f, 123.0);
+@@ -149,7 +149,7 @@
+                   printf ("  point  %s\n", decimal_point);
+                   printf ("  str    %s\n", str);
+                   printf ("  ret    %d\n", ret);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+               if (mpf_cmp_d (f, d) != 0)
+                 {
+@@ -158,7 +158,7 @@
+                   printf    ("  str    %s\n", str);
+                   mpf_trace ("  f", f);
+                   printf    ("  d=%g\n", d);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+             }
+         }
+diff -NaurbEZwB -x 'Makefile*' ./tests/misc/t-printf.c ./tests/misc/t-printf.c
+--- ./tests/misc/t-printf.c	2026-06-06 17:45:32.506659400 +0200
++++ ./tests/misc/t-printf.c	2026-06-06 17:46:04.281155200 +0200
+@@ -120,7 +120,7 @@
+       printf ("  want     |%s|\n", want);
+       printf ("  got_len  %d\n", got_len);
+       printf ("  want_len %d\n", want_len);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+  done:
+@@ -144,7 +144,7 @@
+       printf ("  want     |%s|\n", want);
+       printf ("  got_len  %d\n", got_len);
+       printf ("  want_len %d\n", want_len);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -182,7 +182,7 @@
+       printf ("  ftell_len %ld\n", ftell_len);
+       printf ("  fread_len %d\n", fread_len);
+       printf ("  want_len  %d\n", want_len);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -236,7 +236,7 @@
+ 	      printf ("  want full |%s|\n", want);
+ 	      printf ("  ret       %d\n", ret);
+ 	      printf ("  want_len  %d\n", want_len);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+@@ -259,7 +259,7 @@
+       printf ("  want     |%s|\n", want);
+       printf ("  got_len  %d\n", got_len);
+       printf ("  want_len %d\n", want_len);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   (*__gmp_free_func) (got, strlen(got)+1);
+ }
+@@ -290,7 +290,7 @@
+       printf ("  got_len  %d\n", got_len);
+       printf ("  ob_len   %d\n", ob_len);
+       printf ("  want_len %d\n", want_len);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   obstack_free (&ob, NULL);
+ #endif
+@@ -934,6 +934,11 @@
+ int
+ main (int argc, char *argv[])
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   if (argc > 1 && strcmp (argv[1], "-s") == 0)
+     option_check_printf = 1;
+ 
+@@ -952,4 +957,5 @@
+   unlink (CHECK_VFPRINTF_FILENAME);
+   tests_end ();
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/misc/t-scanf.c ./tests/misc/t-scanf.c
+--- ./tests/misc/t-scanf.c	2026-06-06 17:45:32.520655800 +0200
++++ ./tests/misc/t-scanf.c	2026-06-06 17:46:04.295156100 +0200
+@@ -591,7 +591,7 @@
+                   printf    ("  ftell want =%ld\n", want_ftell);
+                   printf    ("        got  =%ld\n", got_ftell);
+                 }
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+@@ -975,7 +975,7 @@
+                   printf    ("  ftell want =%ld\n", want_ftell);
+                   printf    ("        got  =%ld\n", got_ftell);
+                 }
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+@@ -1273,7 +1273,7 @@
+                   printf    ("  ftell want =%ld\n", want_ftell);
+                   printf    ("        got  =%ld\n", got_ftell);
+                 }
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+@@ -1596,6 +1596,11 @@
+ int
+ main (int argc, char *argv[])
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   if (argc > 1 && strcmp (argv[1], "-s") == 0)
+     option_libc_scanf = 1;
+ 
+@@ -1612,4 +1617,5 @@
+   unlink (TEMPFILE);
+   tests_end ();
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/misc.c ./tests/misc.c
+--- ./tests/misc.c	2026-06-06 17:45:32.532656100 +0200
++++ ./tests/misc.c	2026-06-06 17:46:04.308157300 +0200
+@@ -29,6 +29,12 @@
+ #include <float.h>      /* for DBL_MANT_DIG */
+ #endif
+ 
++#ifdef _WIN64
++
++#include <unistd.h>
++
++#else
++
+ #if TIME_WITH_SYS_TIME
+ # include <sys/time.h>  /* for struct timeval */
+ # include <time.h>
+@@ -40,9 +46,29 @@
+ # endif
+ #endif
+ 
++#endif
++
+ #include "gmp-impl.h"
+ #include "tests.h"
+ 
++#ifdef _WIN64
++
++#define WIN32_LEAN_AND_MEAN
++#include <Windows.h>
++#include <crtdbg.h>
++static _CrtMemState cms;
++static LARGE_INTEGER frequency;
++static LARGE_INTEGER start;
++static LARGE_INTEGER end;
++static double time_consumed;
++
++void my_abort(const char* file, int line)
++{
++  fprintf(stdout, "Test applet called abort() at %i in %s\n", line, file);
++  exit(125);
++}
++
++#endif
+ 
+ /* The various tests setups and final checks, collected up together. */
+ void
+@@ -59,21 +85,80 @@
+       fprintf (stderr, "tests are not linked to the newly compiled library\n");
+       fprintf (stderr, "  local version is: %s\n", version);
+       fprintf (stderr, "  linked version is: %s\n", gmp_version);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   /* don't buffer, so output is not lost if a test causes a segv etc */
+   setbuf (stdout, NULL);
+   setbuf (stderr, NULL);
+ 
++#ifdef _WIN64
++  memset(&cms, 0, sizeof(cms));
++  _CrtMemCheckpoint(&cms);
++
++  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF);
++  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
++  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDOUT);
++  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
++  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
++#endif
++
+   tests_memory_start ();
+   tests_rand_start ();
++
++#ifdef _WIN64
++  QueryPerformanceFrequency(&frequency);
++  QueryPerformanceCounter(&start);
++
++  _unlink("__time__consumed");
++#endif
+ }
+ void
+ tests_end (void)
+ {
++#ifdef _WIN64
++  QueryPerformanceCounter(&end);
++  time_consumed = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
++  {
++    char time_str[64];
++    FILE* f = fopen("__time__consumed", "wt");
++    if (NULL != f)
++    {
++      fprintf(f, "%I64u | ", (unsigned __int64)(end.QuadPart - start.QuadPart));
++      memset(time_str, 0x00, sizeof(time_str));
++      switch (snprintf(time_str, sizeof(time_str), "%.6f", time_consumed))
++      {
++        case 8:
++          fprintf(f, "  %s sec(s)\n", time_str);
++          break;
++        case 9:
++          fprintf(f, " %s sec(s)\n", time_str);
++          break;
++        case 10:
++          fprintf(f, "%s sec(s)\n", time_str);
++          break;
++        default:
++          fprintf(f, "  n/a      sec(s)\n");
++          break;
++      }
++      fclose(f);
++    }
++  }
++#endif
++
+   tests_rand_end ();
+   tests_memory_end ();
++
++#ifdef _WIN64
++  if (!_CrtCheckMemory())
++  {
++    fprintf(stderr, "_CrtCheckMemory FAILED.\n");
++    _CrtMemDumpAllObjectsSince(&cms);
++    exit(101);
++  }
++#endif
+ }
+ 
+ static void
+@@ -117,7 +202,7 @@
+     {
+       printf ("Please let tests_start() initialize the global __gmp_rands.\n");
+       printf ("ie. ensure that function is called before the first use of RANDS.\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   gmp_randinit_default (__gmp_rands);
+@@ -306,7 +391,7 @@
+       fprintf (stderr, "ERROR: mpz_set_str failed\n");
+       fprintf (stderr, "   str  = \"%s\"\n", str);
+       fprintf (stderr, "   base = %d\n", base);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -318,7 +403,7 @@
+       fprintf (stderr, "ERROR: mpq_set_str failed\n");
+       fprintf (stderr, "   str  = \"%s\"\n", str);
+       fprintf (stderr, "   base = %d\n", base);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -330,7 +415,7 @@
+       fprintf (stderr, "ERROR mpf_set_str failed\n");
+       fprintf (stderr, "   str  = \"%s\"\n", str);
+       fprintf (stderr, "   base = %d\n", base);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/reuse.c ./tests/mpf/reuse.c
+--- ./tests/mpf/reuse.c	2026-06-06 17:45:32.570183100 +0200
++++ ./tests/mpf/reuse.c	2026-06-06 17:46:04.322157800 +0200
+@@ -206,7 +206,7 @@
+   printf ("failure in %s:\n", name);
+   mpf_dump (res1);
+   mpf_dump (res2);
+-  abort ();
++  my_abort (__FILE__,__LINE__);
+ }
+ 
+ #if 0
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-add.c ./tests/mpf/t-add.c
+--- ./tests/mpf/t-add.c	2026-06-06 17:45:32.583183400 +0200
++++ ./tests/mpf/t-add.c	2026-06-06 17:46:04.334155800 +0200
+@@ -88,7 +88,7 @@
+ 	      printf ("   v = "); mpf_dump (v);
+ 	      printf ("wref = "); mpf_dump (wref);
+ 	      printf ("   w = "); mpf_dump (w);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-cmp_d.c ./tests/mpf/t-cmp_d.c
+--- ./tests/mpf/t-cmp_d.c	2026-06-06 17:45:32.595185500 +0200
++++ ./tests/mpf/t-cmp_d.c	2026-06-06 17:46:04.348157700 +0200
+@@ -48,7 +48,7 @@
+       for (i = 0; i < sizeof(y); i++)
+         printf (" %02X", (unsigned) ((unsigned char *) &y)[i]);
+       printf ("\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-cmp_si.c ./tests/mpf/t-cmp_si.c
+--- ./tests/mpf/t-cmp_si.c	2026-06-06 17:45:32.607188700 +0200
++++ ./tests/mpf/t-cmp_si.c	2026-06-06 17:46:04.362165600 +0200
+@@ -100,7 +100,7 @@
+               printf ("  b=%ld (%s)\n", b, data[i].b);
+               printf ("  got=%d\n", got);
+               printf ("  want=%d\n", data[i].want);
+-              abort();
++              my_abort(__FILE__,__LINE__);
+             }
+         }
+ 
+@@ -114,7 +114,7 @@
+ 	  printf ("  b=%ld (%s)\n", b, data[i].b);
+ 	  printf ("  got=%d\n", got);
+ 	  printf ("  want=%d\n", data[i].want);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-conv.c ./tests/mpf/t-conv.c
+--- ./tests/mpf/t-conv.c	2026-06-06 17:45:32.618186800 +0200
++++ ./tests/mpf/t-conv.c	2026-06-06 17:46:04.374195400 +0200
+@@ -75,131 +75,131 @@
+   mpf_set_str (x, "1.23456", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "00000000000000000000000000000000000000001.23456", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0.000000000000000000000000000000000000000123456e40", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, ".000000000000000000000000000000000000000123456e40", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "00000000000000000000.00000000000000000000123456e21", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   mpf_set_str (y, "1.23456e1000", 0);
+   mpf_set_str (x, "1.23456e1000", 10);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "1.23456e+1000", 0);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "1.23456e+1000", 10);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "00000000000000000000000000000000000000001.23456e+1000", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0.000000000000000000000000000000000000000123456e+1040", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, ".000000000000000000000000000000000000000123456e+1040", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "00000000000000000000.00000000000000000000123456e+1021", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   mpf_set_str (y, "1.23456", 16);
+   mpf_set_str (x, "00000000000000000000000000000000000000001.23456", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0.000000000000000000000000000000000000000123456@28", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, ".000000000000000000000000000000000000000123456@28", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "00000000000000000000.00000000000000000000123456@15", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   mpf_set_str (y, "   0", 10);
+   mpf_set_str (x, "00000000000000000000000000000000000000000000000000000", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0000000000000000000000000000000000000000000000000000.", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "000000000000000000000000000000000000000000000000000.0", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, ".0000000000000000000000000000000000000000000000000000", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0.000000000000000000000000000000000000000000000000000", 10);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   mpf_set_str (x, "00000000000000000000000000000000000000000000000000000", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0000000000000000000000000000000000000000000000000000.", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "000000000000000000000000000000000000000000000000000.0", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, ".0000000000000000000000000000000000000000000000000000", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "0.000000000000000000000000000000000000000000000000000", 16);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "+00000000000000000000000000000000000000000000000000000e-345", 9);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "-0000000000000000000000000000000000000000000000000000.@AB", 26);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "000000000000000000000000000000000000000000000000000.0@78", 19);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "+.0000000000000000000000000000000000000000000000000000e555", 6);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+   mpf_set_str (x, "-0.000000000000000000000000000000000000000000000000000@-AAAAAAAAAAAAAAAAAAAAAAAA", 17);
+   MPF_CHECK_FORMAT (x);
+   if (mpf_cmp (x, y) != 0)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   /* Now test random values.  */
+ 
+@@ -223,9 +223,17 @@
+       str = mpf_get_str (0, &bexp, base, 0, x);
+ 
+       if (str[0] == '-')
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++        sprintf(buf, "-0.%s@%lld", str + 1, bexp);
++#else
+ 	sprintf (buf, "-0.%s@%ld", str + 1, bexp);
++#endif
+       else
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++        sprintf(buf, "0.%s@%lld", str, bexp);
++#else
+ 	sprintf (buf, "0.%s@%ld", str, bexp);
++#endif
+ 
+       mpf_set_str_or_abort (y, buf, -base);
+       (*__gmp_free_func) (str, strlen (str) + 1);
+@@ -243,7 +251,7 @@
+ 	      printf ("base = %d\n", base);
+ 	      printf ("   x = "); mpf_dump (x);
+ 	      printf ("   y = "); mpf_dump (y);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-div.c ./tests/mpf/t-div.c
+--- ./tests/mpf/t-div.c	2026-06-06 17:45:32.630183600 +0200
++++ ./tests/mpf/t-div.c	2026-06-06 17:46:04.387197100 +0200
+@@ -32,7 +32,7 @@
+       mpf_trace ("  u", u);
+       mpf_trace ("  v", v);
+       printf    ("  %s\n", desc);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-dm2exp.c ./tests/mpf/t-dm2exp.c
+--- ./tests/mpf/t-dm2exp.c	2026-06-06 17:45:32.640182300 +0200
++++ ./tests/mpf/t-dm2exp.c	2026-06-06 17:46:04.399196500 +0200
+@@ -89,7 +89,7 @@
+ 	  printf ("   v = "); mpf_dump (v);
+ 	  printf ("  w1 = "); mpf_dump (w1);
+ 	  printf ("  w2 = "); mpf_dump (w2);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+       mpf_mul_2exp (w3, w1, pow2);
+       mpf_reldiff (rerr, u, w3);
+@@ -100,7 +100,7 @@
+ 	  printf ("   v = "); mpf_dump (v);
+ 	  printf ("  w1 = "); mpf_dump (w1);
+ 	  printf ("  w3 = "); mpf_dump (w3);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-eq.c ./tests/mpf/t-eq.c
+--- ./tests/mpf/t-eq.c	2026-06-06 17:45:32.652187200 +0200
++++ ./tests/mpf/t-eq.c	2026-06-06 17:46:04.413196300 +0200
+@@ -91,7 +91,7 @@
+ 	  printf ("got         %d\n", got);
+ 	  printf ("got_swapped %d\n", got_swapped);
+ 	  printf ("want        %d\n", data[i].want);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+         }
+     }
+ }
+@@ -184,7 +184,7 @@
+   printf ("hibits = %d\n", hibits);
+   hexdump (a); puts ("");
+   hexdump (b); puts ("");
+-  abort ();
++  my_abort (__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-fits.c ./tests/mpf/t-fits.c
+--- ./tests/mpf/t-fits.c	2026-06-06 17:45:32.664695700 +0200
++++ ./tests/mpf/t-fits.c	2026-06-06 17:46:04.426198300 +0200
+@@ -26,6 +26,21 @@
+ /* Nothing sophisticated here, just exercise mpf_fits_*_p on a small amount
+    of data. */
+ 
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++
++#define EXPECT_S(fun,name,answer)                                        \
++  got = fun (f);                                                         \
++  if (got != answer)                                                     \
++    {                                                                    \
++      printf ("%s (%s) got %d want %d\n", name, expr, got, answer);      \
++printf(" f size %d exp %lld\n", SIZ(f), EXP(f));                         \
++printf(" f dec "); mpf_out_str(stdout, 10, 0, f); printf("\n");          \
++printf(" f hex "); mpf_out_str(stdout, 16, 0, f); printf("\n");          \
++error = 1;                                                               \
++  }
++
++#else
++
+ #define EXPECT_S(fun,name,answer)                                        \
+   got = fun (f);                                                         \
+   if (got != answer)                                                     \
+@@ -37,6 +52,8 @@
+       error = 1;                                                         \
+     }
+ 
++#endif
++
+ #define EXPECT(fun,answer)  EXPECT_S(fun,#fun,answer)
+ 
+ int
+@@ -318,7 +335,7 @@
+ 
+ 
+   if (error)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   mpf_clear (f);
+   mpf_clear (f0p5);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-get_d_2exp.c ./tests/mpf/t-get_d_2exp.c
+--- ./tests/mpf/t-get_d_2exp.c	2026-06-06 17:45:32.689696600 +0200
++++ ./tests/mpf/t-get_d_2exp.c	2026-06-06 17:46:04.450195800 +0200
+@@ -46,7 +46,7 @@
+       mpf_trace ("   f    ", f);
+       d_trace   ("   got  ", got);
+       printf    ("   got exp  %ld\n", got_exp);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ 
+   for (exp = -513; exp <= 513; exp++)
+@@ -71,7 +71,7 @@
+ 	      d_trace   ("   got  ", got);
+ 	      printf    ("   want exp %ld\n", exp);
+ 	      printf    ("   got exp  %ld\n", got_exp);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+@@ -112,7 +112,7 @@
+               mpf_trace ("   f    ", f);
+               d_trace   ("   got  ", got);
+               printf    ("   got exp  %ld\n", got_exp);
+-              abort();
++              my_abort(__FILE__,__LINE__);
+             }
+         }
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-get_d.c ./tests/mpf/t-get_d.c
+--- ./tests/mpf/t-get_d.c	2026-06-06 17:45:32.675693600 +0200
++++ ./tests/mpf/t-get_d.c	2026-06-06 17:46:04.438198300 +0200
+@@ -58,7 +58,7 @@
+       mpf_set_d (f, d1);
+       d2 = mpf_get_d (f);
+       if (d1 != d2)
+-        abort ();
++        my_abort (__FILE__,__LINE__);
+       d1 *= 0.4;
+     }
+ 
+@@ -81,13 +81,13 @@
+     {
+       mpf_set_d (v, d);
+       if (mpf_cmp (u, v) >= 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+       e = mpf_get_d (v);
+       r = e/d;
+       if (r < 0.99999999999999 || r > 1.00000000000001)
+ 	{
+ 	  fprintf (stderr, "should be one ulp from 1: %.16f\n", r);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+       mpf_set (u, v);
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-get_si.c ./tests/mpf/t-get_si.c
+--- ./tests/mpf/t-get_si.c	2026-06-06 17:45:32.701695800 +0200
++++ ./tests/mpf/t-get_si.c	2026-06-06 17:46:04.462203000 +0200
+@@ -74,7 +74,7 @@
+ 	  printf ("     exp  %ld\n", (long) EXP(f));
+ 	  printf ("   got   %ld (0x%lX)\n", got, got);
+ 	  printf ("   want  %ld (0x%lX)\n", data[i].want, data[i].want);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   mpf_clear (f);
+@@ -99,7 +99,7 @@
+       mpf_out_str (stdout, 16, 0, f); printf ("\n");            \
+       printf ("   got  %ld, hex %lX\n", got, got);              \
+       printf ("   want %ld, hex %lX\n", want, want);            \
+-      abort();                                                  \
++      my_abort(__FILE__,__LINE__);                                                  \
+     }
+ 
+   want = LONG_MAX;
+@@ -202,7 +202,7 @@
+ 	  printf    ("  exp %ld\n", (long) data[i].exp);
+ 	  printf    ("  got   %lu (0x%lX)\n", got, got);
+ 	  printf    ("  want  %lu (0x%lX)\n", data[i].want, data[i].want);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-get_ui.c ./tests/mpf/t-get_ui.c
+--- ./tests/mpf/t-get_ui.c	2026-06-06 17:45:32.713696000 +0200
++++ ./tests/mpf/t-get_ui.c	2026-06-06 17:46:04.474222000 +0200
+@@ -109,7 +109,7 @@
+ 	  printf    ("  exp %ld\n", (long) data[i].exp);
+ 	  printf    ("  got   %lu (0x%lX)\n", got, got);
+ 	  printf    ("  want  %lu (0x%lX)\n", data[i].want, data[i].want);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-gsprec.c ./tests/mpf/t-gsprec.c
+--- ./tests/mpf/t-gsprec.c	2026-06-06 17:45:32.724697100 +0200
++++ ./tests/mpf/t-gsprec.c	2026-06-06 17:46:04.485223600 +0200
+@@ -42,7 +42,7 @@
+           printf ("   set %lu gives %lu, but then set %lu gives %lu\n",
+                   i, a,
+                   a, b);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-inp_str.c ./tests/mpf/t-inp_str.c
+--- ./tests/mpf/t-inp_str.c	2026-06-06 17:45:32.735695600 +0200
++++ ./tests/mpf/t-inp_str.c	2026-06-06 17:46:04.498222800 +0200
+@@ -119,7 +119,7 @@
+                       printf ("  post         %d\n", post);
+                       printf ("  got_nread    %d\n", got_nread);
+                       printf ("  ftell_nread  %ld\n", ftell_nread);
+-                      abort ();
++                      my_abort (__FILE__,__LINE__);
+                     }
+                 }
+ 
+@@ -136,7 +136,7 @@
+                       printf ("  pre   %d\n", pre);
+                       printf ("  post  %d\n", post);
+                       printf ("  c     '%c' %#x\n", c, c);
+-                      abort ();
++                      my_abort (__FILE__,__LINE__);
+                     }
+                 }
+ 
+@@ -154,7 +154,7 @@
+                   printf ("  post        %d\n", post);
+                   printf ("  got_nread   %d\n", got_nread);
+                   printf ("  want_nread  %d\n", want_nread);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+ 
+               MPF_CHECK_FORMAT (got);
+@@ -166,7 +166,7 @@
+                   printf ("  base  %d\n", data[i].base);
+                   mpf_trace ("  got ",  got);
+                   mpf_trace ("  want", want);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+ 
+               ASSERT_ALWAYS (fclose (fp) == 0);
+@@ -181,6 +181,9 @@
+ int
+ main (void)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   tests_start ();
+ 
+   check_data ();
+@@ -188,4 +191,5 @@
+   unlink (FILENAME);
+   tests_end ();
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-int_p.c ./tests/mpf/t-int_p.c
+--- ./tests/mpf/t-int_p.c	2026-06-06 17:45:32.748702000 +0200
++++ ./tests/mpf/t-int_p.c	2026-06-06 17:46:04.510222700 +0200
+@@ -32,7 +32,7 @@
+     {
+       printf ("mpf_integer_p got %d want %d\n", got, want);
+       mpf_trace (" f", f);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-muldiv.c ./tests/mpf/t-muldiv.c
+--- ./tests/mpf/t-muldiv.c	2026-06-06 17:45:32.760213000 +0200
++++ ./tests/mpf/t-muldiv.c	2026-06-06 17:46:04.522222900 +0200
+@@ -111,7 +111,7 @@
+ 	  printf ("   v = "); mpf_dump (v);
+ 	  printf ("   x = "); mpf_dump (x);
+ 	  printf ("   w = "); mpf_dump (w);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (single_flag == 2)
+@@ -125,7 +125,7 @@
+ 	      printf ("   v = "); mpf_dump (v);
+ 	      printf ("   x = "); mpf_dump (x);
+ 	      printf ("   w = "); mpf_dump (w);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+ 
+@@ -140,7 +140,7 @@
+ 	      printf ("   v = "); mpf_dump (v);
+ 	      printf ("   x = "); mpf_dump (x);
+ 	      printf ("   w = "); mpf_dump (w);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-mul_ui.c ./tests/mpf/t-mul_ui.c
+--- ./tests/mpf/t-mul_ui.c	2026-06-06 17:45:32.773214900 +0200
++++ ./tests/mpf/t-mul_ui.c	2026-06-06 17:46:04.534222200 +0200
+@@ -50,7 +50,7 @@
+       printf    ("  %s\n", desc);
+       mpf_trace ("  u", u);
+       printf    ("  v %ld  0x%lX\n", v, v);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   free (wp);
+@@ -135,7 +135,7 @@
+       mpf_trace ("u   ", u);
+       mpf_trace ("got ", got);
+       mpf_trace ("want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   s = "1 * ULONG_MAX";
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-pow_ui.c ./tests/mpf/t-pow_ui.c
+--- ./tests/mpf/t-pow_ui.c	2026-06-06 17:45:32.784214900 +0200
++++ ./tests/mpf/t-pow_ui.c	2026-06-06 17:46:04.546221400 +0200
+@@ -45,7 +45,7 @@
+ 	  mpf_pow_ui (r, b1, e);
+ 
+ 	  if (mpf_cmp (r, r2))
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 
+ 	  mpf_mul_ui (r2, r2, b);
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-set.c ./tests/mpf/t-set.c
+--- ./tests/mpf/t-set.c	2026-06-06 17:45:32.795214400 +0200
++++ ./tests/mpf/t-set.c	2026-06-06 17:46:04.556226800 +0200
+@@ -77,7 +77,7 @@
+       if (!mpf_eq (a, b, precbits))
+ 	{
+ 	  printf ("mpf_init_set wrong.\n");
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       mpf_set_ui (b, 0);
+@@ -86,7 +86,7 @@
+       if (!mpf_eq (a, b, precbits))
+ 	{
+ 	  printf ("mpf_set wrong.\n");
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       mpf_clear (b);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-set_q.c ./tests/mpf/t-set_q.c
+--- ./tests/mpf/t-set_q.c	2026-06-06 17:45:32.807213600 +0200
++++ ./tests/mpf/t-set_q.c	2026-06-06 17:46:04.568228300 +0200
+@@ -42,7 +42,7 @@
+     {
+       mp_trace_base = -16;
+       mpq_trace ("   q", q);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-set_si.c ./tests/mpf/t-set_si.c
+--- ./tests/mpf/t-set_si.c	2026-06-06 17:45:32.819217700 +0200
++++ ./tests/mpf/t-set_si.c	2026-06-06 17:46:04.580603000 +0200
+@@ -60,7 +60,7 @@
+           || x->_mp_exp != ABS (data[i].want_size))
+         {
+           printf ("mpf_set_si wrong on data[%d]\n", i);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpf_clear (x);
+ 
+@@ -72,7 +72,7 @@
+           || x->_mp_exp != ABS (data[i].want_size))
+         {
+           printf ("mpf_init_set_si wrong on data[%d]\n", i);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpf_clear (x);
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-set_ui.c ./tests/mpf/t-set_ui.c
+--- ./tests/mpf/t-set_ui.c	2026-06-06 17:45:32.830630900 +0200
++++ ./tests/mpf/t-set_ui.c	2026-06-06 17:46:04.592604300 +0200
+@@ -59,7 +59,7 @@
+           || x->_mp_exp != ABS (data[i].want_size))
+         {
+           printf ("mpf_set_ui wrong on data[%d]\n", i);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpf_clear (x);
+ 
+@@ -71,7 +71,7 @@
+           || x->_mp_exp != ABS (data[i].want_size))
+         {
+           printf ("mpf_init_set_ui wrong on data[%d]\n", i);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpf_clear (x);
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-sqrt.c ./tests/mpf/t-sqrt.c
+--- ./tests/mpf/t-sqrt.c	2026-06-06 17:45:32.841621600 +0200
++++ ./tests/mpf/t-sqrt.c	2026-06-06 17:46:04.603609300 +0200
+@@ -90,7 +90,7 @@
+ 	      mpf_trace ("   y2 ", y2);
+ 	      mpf_trace ("   rerr      ", rerr);
+ 	      mpf_trace ("   limit_rerr", limit_rerr);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+@@ -145,7 +145,7 @@
+           printf    ("  r_prec=%lu\n", r_prec);
+           printf    ("  SIZ(r)  %ld\n", (long) SIZ(r));
+           printf    ("  PREC(r) %ld\n", (long) PREC(r));
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* Must have r^2 <= x, since r has been truncated. */
+@@ -157,7 +157,7 @@
+           printf    ("  r_prec=%lu\n", r_prec);
+           mpf_trace ("  r", r);
+           mpf_trace ("  s", s);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* Must have (r+ulp)^2 > x, or else r is too small. */
+@@ -170,7 +170,7 @@
+           printf    ("  r_prec=%lu\n", r_prec);
+           mpf_trace ("  r+ulp", r);
+           mpf_trace ("  s", s);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-sqrt_ui.c ./tests/mpf/t-sqrt_ui.c
+--- ./tests/mpf/t-sqrt_ui.c	2026-06-06 17:45:32.852624400 +0200
++++ ./tests/mpf/t-sqrt_ui.c	2026-06-06 17:46:04.617600500 +0200
+@@ -47,7 +47,7 @@
+ 	  printf    ("mpf_sqrt_ui wrong for special case:\n");
+           printf    ("  x=%lu\n", x);
+           mpf_trace ("  r", r);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -78,7 +78,7 @@
+           mpf_trace ("  r", r);
+           printf    ("  r size %ld\n", (long) SIZ(r));
+           printf    ("  r prec %ld\n", (long) PREC(r));
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* Must have r^2 <= x, since r has been truncated. */
+@@ -90,7 +90,7 @@
+           printf    ("  want prec=%lu\n", prec);
+           mpf_trace ("  r", r);
+           mpf_trace ("  s", s);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* Must have (r+ulp)^2 > x.
+@@ -104,7 +104,7 @@
+           printf    ("  want prec=%lu\n", prec);
+           mpf_trace ("  r+ulp", r);
+           mpf_trace ("  s", s);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-sub.c ./tests/mpf/t-sub.c
+--- ./tests/mpf/t-sub.c	2026-06-06 17:45:32.864741200 +0200
++++ ./tests/mpf/t-sub.c	2026-06-06 17:46:04.629601100 +0200
+@@ -91,7 +91,7 @@
+ 	      printf ("   v = "); mpf_dump (v);
+ 	      printf ("wref = "); mpf_dump (wref);
+ 	      printf ("   w = "); mpf_dump (w);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+@@ -270,7 +270,7 @@
+ 
+   mpf_clear (got);
+   if (fail)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ }
+ 
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-trunc.c ./tests/mpf/t-trunc.c
+--- ./tests/mpf/t-trunc.c	2026-06-06 17:45:32.876740000 +0200
++++ ./tests/mpf/t-trunc.c	2026-06-06 17:46:04.642600000 +0200
+@@ -31,10 +31,18 @@
+   mpf_trace ("got ", got);
+   mpf_trace ("want", want);
+ 
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++  printf("got  size=%d exp=%lld\n", SIZ(got), EXP(got));
++#else
+   printf ("got  size=%d exp=%ld\n", SIZ(got), EXP(got));
++#endif
+   mpn_trace ("     limbs=", PTR(got), (mp_size_t) ABSIZ(got));
+ 
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++  printf("want size=%d exp=%lld\n", SIZ(want), EXP(want));
++#else
+   printf ("want size=%d exp=%ld\n", SIZ(want), EXP(want));
++#endif
+   mpn_trace ("     limbs=", PTR(want), (mp_size_t) ABSIZ(want));
+ }
+ 
+@@ -56,7 +64,7 @@
+     {                                           \
+ 	printf ("%s wrong\n", name);            \
+ 	check_print (src, got, want);           \
+-	abort ();                               \
++	my_abort (__FILE__,__LINE__);                               \
+     }
+ 
+   CHECK_SEP ("mpf_trunc", mpf_trunc, trunc);
+@@ -71,7 +79,7 @@
+     {                                   \
+ 	printf ("%s wrong\n", name);    \
+ 	check_print (src, got, want);   \
+-	abort ();                       \
++	my_abort (__FILE__,__LINE__);                       \
+     }
+ 
+   CHECK_INPLACE ("mpf_trunc", mpf_trunc, trunc);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpf/t-ui_div.c ./tests/mpf/t-ui_div.c
+--- ./tests/mpf/t-ui_div.c	2026-06-06 17:45:32.888740400 +0200
++++ ./tests/mpf/t-ui_div.c	2026-06-06 17:46:04.654601400 +0200
+@@ -47,7 +47,7 @@
+       printf    ("  u 0x%lX  (%lu)\n", u, u);
+       mpf_trace ("  v", v);
+       printf    ("  %s\n", desc);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/logic.c ./tests/mpn/logic.c
+--- ./tests/mpn/logic.c	2026-06-06 17:45:32.901753700 +0200
++++ ./tests/mpn/logic.c	2026-06-06 17:46:04.666607100 +0200
+@@ -49,7 +49,7 @@
+       printf ("b: "); mpn_dump (bp, n);
+       printf ("r:   "); mpn_dump (rp, n);
+       printf ("ref: "); mpn_dump (refp, n);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-addaddmul.c ./tests/mpn/t-addaddmul.c
+--- ./tests/mpn/t-addaddmul.c	2026-06-06 17:45:32.941748000 +0200
++++ ./tests/mpn/t-addaddmul.c	2026-06-06 17:46:04.679118000 +0200
+@@ -52,7 +52,7 @@
+       gmp_fprintf (stderr, "res=%Nx\n", r, n + 1);
+       gmp_fprintf (stderr, "ref=%Nx\n", ref, n + 1);
+ 
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-aors_1.c ./tests/mpn/t-aors_1.c
+--- ./tests/mpn/t-aors_1.c	2026-06-06 17:45:32.954745400 +0200
++++ ./tests/mpn/t-aors_1.c	2026-06-06 17:46:04.692119400 +0200
+@@ -60,19 +60,23 @@
+   if (got[size] != MAGIC)
+     {
+       printf ("Overwrite at %s i=%d\n", name, i);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (got_c != want_c || ! refmpn_equal_anynail (got, want, size))
+     {
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++    printf("Wrong at %s i=%d size=%lld\n", name, i, size);
++#else
+       printf ("Wrong at %s i=%d size=%ld\n", name, i, size);
++#endif
+       mpn_trace ("   src", src,  size);
+       mpn_trace ("     n", &n,   (mp_size_t) 1);
+       mpn_trace ("   got", got,  size);
+       mpn_trace ("  want", want, size);
+       mpn_trace (" got c", &got_c,  (mp_size_t) 1);
+       mpn_trace ("want c", &want_c, (mp_size_t) 1);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-asmtype.c ./tests/mpn/t-asmtype.c
+--- ./tests/mpn/t-asmtype.c	2026-06-06 17:45:32.966849500 +0200
++++ ./tests/mpn/t-asmtype.c	2026-06-06 17:46:04.704118700 +0200
+@@ -56,7 +56,7 @@
+   if (refmpn_cmp (got, want, (mp_size_t) 3) != 0)
+     {
+       printf ("Wrong result from mpn_add_n\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   exit (0);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-bdiv.c ./tests/mpn/t-bdiv.c
+--- ./tests/mpn/t-bdiv.c	2026-06-06 17:45:32.978853500 +0200
++++ ./tests/mpn/t-bdiv.c	2026-06-06 17:46:04.716119400 +0200
+@@ -32,13 +32,13 @@
+     {
+       for (i = n - 1; i >= n - 4; i--)
+ 	{
+-	  printf ("%0*lx", (int) (2 * sizeof (mp_limb_t)), p[i]);
++	  printf ("%0*I64x", (int) (2 * sizeof (mp_limb_t)), p[i]);
+ 	  printf (" ");
+ 	}
+       printf ("... ");
+       for (i = 3; i >= 0; i--)
+ 	{
+-	  printf ("%0*lx", (int) (2 * sizeof (mp_limb_t)), p[i]);
++	  printf ("%0*I64x", (int) (2 * sizeof (mp_limb_t)), p[i]);
+ 	  printf (i == 0 ? "" : " ");
+ 	}
+     }
+@@ -46,7 +46,7 @@
+     {
+       for (i = n - 1; i >= 0; i--)
+ 	{
+-	  printf ("%0*lx", (int) (2 * sizeof (mp_limb_t)), p[i]);
++	  printf ("%0*I64x", (int) (2 * sizeof (mp_limb_t)), p[i]);
+ 	  printf (i == 0 ? "" : " ");
+ 	}
+     }
+@@ -94,9 +94,13 @@
+ 	  printf ("Rb=  %d, Cy=%d\n", (int) cy, (int) rh);
+ 	}
+       printf ("T=   "); dumpy (tp, nn);
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++      printf("nn = %lld, dn = %lld, qn = %lld", nn, dn, qn);
++#else
+       printf ("nn = %ld, dn = %ld, qn = %ld", nn, dn, qn);
++#endif
+       printf ("\n*******************************************************************************\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-broot.c ./tests/mpn/t-broot.c
+--- ./tests/mpn/t-broot.c	2026-06-06 17:45:32.988850800 +0200
++++ ./tests/mpn/t-broot.c	2026-06-06 17:46:04.728119600 +0200
+@@ -86,7 +86,7 @@
+ 	  gmp_fprintf (stderr, "a   = %Nx\n", ap, n);
+ 	  gmp_fprintf (stderr, "r   = %Nx\n", rp, n);
+ 	  gmp_fprintf (stderr, "r^k = %Nx\n", pp, n);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -99,7 +99,7 @@
+       gmp_fprintf (stderr, "k   = %Mx\n", 1);
+       gmp_fprintf (stderr, "a   = %Nx\n", ap, MAX_LIMBS);
+       gmp_fprintf (stderr, "r   = %Nx\n", rp, MAX_LIMBS);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-brootinv.c ./tests/mpn/t-brootinv.c
+--- ./tests/mpn/t-brootinv.c	2026-06-06 17:45:33.000853000 +0200
++++ ./tests/mpn/t-brootinv.c	2026-06-06 17:46:04.742117900 +0200
+@@ -87,7 +87,7 @@
+ 	  gmp_fprintf (stderr, "r     = %Nx\n", rp, n);
+ 	  gmp_fprintf (stderr, "r^n   = %Nx\n", pp, n);
+ 	  gmp_fprintf (stderr, "a r^n = %Nx\n", app, n);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-div.c ./tests/mpn/t-div.c
+--- ./tests/mpn/t-div.c	2026-06-06 17:45:33.012850700 +0200
++++ ./tests/mpn/t-div.c	2026-06-06 17:46:04.755117800 +0200
+@@ -33,13 +33,13 @@
+     {
+       for (i = n - 1; i >= n - 4; i--)
+ 	{
+-	  printf ("%0*lx", (int) (2 * sizeof (mp_limb_t)), p[i]);
++	  printf ("%0*I64x", (int) (2 * sizeof (mp_limb_t)), p[i]);
+ 	  printf (" ");
+ 	}
+       printf ("... ");
+       for (i = 3; i >= 0; i--)
+ 	{
+-	  printf ("%0*lx", (int) (2 * sizeof (mp_limb_t)), p[i]);
++	  printf ("%0*I64x", (int) (2 * sizeof (mp_limb_t)), p[i]);
+ 	  printf (i == 0 ? "" : " ");
+ 	}
+     }
+@@ -47,7 +47,7 @@
+     {
+       for (i = n - 1; i >= 0; i--)
+ 	{
+-	  printf ("%0*lx", (int) (2 * sizeof (mp_limb_t)), p[i]);
++	  printf ("%0*I64x", (int) (2 * sizeof (mp_limb_t)), p[i]);
+ 	  printf (i == 0 ? "" : " ");
+ 	}
+     }
+@@ -91,8 +91,12 @@
+       if (rp)
+ 	{ printf ("R=    "); dumpy (rp, dn); }
+       printf ("%5s=", tvalue); dumpy (tp, nn+1);
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++			printf("nn = %lld, dn = %lld, qn = %lld\n", nn, dn, qn);
++#else
+       printf ("nn = %ld, dn = %ld, qn = %ld\n", nn, dn, qn);
+-      abort ();
++#endif
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   ASSERT_NOCARRY (refmpn_sub_n (tp, np, tp, nn));
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-divrem_1.c ./tests/mpn/t-divrem_1.c
+--- ./tests/mpn/t-divrem_1.c	2026-06-06 17:45:33.024850300 +0200
++++ ./tests/mpn/t-divrem_1.c	2026-06-06 17:46:04.768123300 +0200
+@@ -88,7 +88,7 @@
+           mpn_trace     ("  got  q", got_q, qsize);
+           mp_limb_trace ("  want r", data[i].want_r);
+           mp_limb_trace ("  got  r", got_r);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* test if available */
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-fib2m.c ./tests/mpn/t-fib2m.c
+--- ./tests/mpn/t-fib2m.c	2026-06-06 17:45:33.046858700 +0200
++++ ./tests/mpn/t-fib2m.c	2026-06-06 17:46:04.793629500 +0200
+@@ -116,7 +116,7 @@
+ 	      printf ("after fks1m:"); mpn_dump (fks1m + 2 * mn + 1, 1);
+ 	      printf ("keep:   "); mpn_dump (&fk1_after, 1);
+ 	    }
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       if (mpn_cmp (fkm, fk, mn) != 0)
+@@ -128,7 +128,7 @@
+ 	      mpn_dump (fk, mn);
+ 	      mpn_dump (fkm, mn);
+ 	      mpn_dump (mp, mn);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	  signflip ^= 1;
+ 	}
+@@ -142,7 +142,7 @@
+ 	      mpn_dump (fks1, mn);
+ 	      mpn_dump (fks1m, mn);
+ 	      mpn_dump (mp, mn);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	  signflip ^= 1;
+ 	}
+@@ -160,7 +160,7 @@
+ 	    }
+ 	  printf ("ERROR(sign) in test %d, k = %lu, mn = %u\n",
+ 		  test, k, (unsigned) mn);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+@@ -232,7 +232,7 @@
+ 	      printf ("after fks1a:"); mpn_dump (fks1a + 2 * mn + 1, 1);
+ 	      printf ("keep:   "); mpn_dump (&fk1a_after, 1);
+ 	    }
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       if (signflip && ! mpn_zero_p (fks1a, mn))
+@@ -277,7 +277,7 @@
+ 	      printf ("after fks1b:"); mpn_dump (fks1b + 2 * mn + 1, 1);
+ 	      printf ("keep:   "); mpn_dump (&fk1b_after, 1);
+ 	    }
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       if (mpn_cmp (fks1a, fkb, mn) != 0)
+@@ -288,7 +288,7 @@
+ 	      mpn_dump (fks1a, mn);
+ 	      mpn_dump (fkb, mn);
+ 	      mpn_dump (mp, mn);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	  signflip ^= 1;
+ 	}
+@@ -301,7 +301,7 @@
+ 	      mpn_dump (fka, mn);
+ 	      mpn_dump (fks1b, mn);
+ 	      mpn_dump (mp, mn);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	  signflip ^= 1;
+ 	}
+@@ -319,7 +319,7 @@
+ 	    }
+ 	  printf ("ERROR(sign) in test %d, exp2 = %lu\n",
+ 		  test, exp2);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-gcd_11.c ./tests/mpn/t-gcd_11.c
+--- ./tests/mpn/t-gcd_11.c	2026-06-06 17:45:33.070155600 +0200
++++ ./tests/mpn/t-gcd_11.c	2026-06-06 17:46:04.817630700 +0200
+@@ -36,7 +36,7 @@
+       gmp_fprintf (stderr,
+ 		   "gcd_11 (0x%Mx, 0x%Mx) failed, got: 0x%Mx, ref: 0x%Mx\n",
+ 		   a, b, r, ref);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-gcd_22.c ./tests/mpn/t-gcd_22.c
+--- ./tests/mpn/t-gcd_22.c	2026-06-06 17:45:33.082156400 +0200
++++ ./tests/mpn/t-gcd_22.c	2026-06-06 17:46:04.829636800 +0200
+@@ -37,7 +37,7 @@
+       gmp_fprintf (stderr,
+ 		   "gcd_22 (0x%Zx, 0x%Zx) failed, got: g1 = 0x%Mx g0 = %Mx, ref: 0x%Zx\n",
+                    a, b, r.d1, r.d0, ref);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-gcdext_1.c ./tests/mpn/t-gcdext_1.c
+--- ./tests/mpn/t-gcdext_1.c	2026-06-06 17:45:33.057859300 +0200
++++ ./tests/mpn/t-gcdext_1.c	2026-06-06 17:46:04.805634100 +0200
+@@ -84,7 +84,7 @@
+ 	       a, b, g,
+ 	       s < 0 ? "-" : "", ABS_CAST(mp_limb_t, s),
+ 	       t < 0 ? "-" : "", ABS_CAST(mp_limb_t, t));
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ int
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-get_d.c ./tests/mpn/t-get_d.c
+--- ./tests/mpn/t-get_d.c	2026-06-06 17:45:33.096154000 +0200
++++ ./tests/mpn/t-get_d.c	2026-06-06 17:46:04.842145800 +0200
+@@ -112,7 +112,7 @@
+                   printf    ("   nsize    %ld\n", (long) nsize);
+                   d_trace   ("   want     ", want);
+                   d_trace   ("   got      ", got);
+-                  abort();
++                  my_abort(__FILE__,__LINE__);
+                 }
+             }
+         }
+@@ -153,7 +153,7 @@
+               printf    ("   nsize    %ld\n", (long) nsize);
+               d_trace   ("   want     ", want);
+               d_trace   ("   got      ", got);
+-              abort();
++              my_abort(__FILE__,__LINE__);
+             }
+           want = -want;
+         }
+@@ -199,7 +199,7 @@
+                   printf  ("  exp      %ld\n", exp);
+                   printf  ("  sign     %ld\n", (long) sign);
+                   d_trace ("  got      ", got);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+             }
+         }
+@@ -247,7 +247,7 @@
+                   printf  ("  sign     %ld\n", (long) sign);
+                   d_trace ("  got      ", got);
+                   printf  ("  got sign %ld\n", (long) got_sign);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+               if (got_sign != sign)
+                 {
+@@ -294,7 +294,7 @@
+                   printf  ("  sign  %ld\n", (long) sign);
+                   d_trace ("  got   ", got);
+                   d_trace ("  want  ", want);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+               want = -want;
+             }
+@@ -344,7 +344,7 @@
+                   printf  ("  sign  %ld\n", (long) sign);
+                   d_trace ("  got   ", got);
+                   d_trace ("  want  ", want);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+               want = -want;
+             }
+@@ -390,7 +390,7 @@
+           printf  ("  exp    %ld\n", exp);
+           d_trace ("  got    ", got);
+           d_trace ("  want   ", want);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ #endif
+@@ -467,7 +467,7 @@
+           printf    ("   exp      %ld\n", exp);
+           d_trace   ("   want     ", want);
+           d_trace   ("   got      ", got);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-hgcd_appr.c ./tests/mpn/t-hgcd_appr.c
+--- ./tests/mpn/t-hgcd_appr.c	2026-06-06 17:45:33.120156100 +0200
++++ ./tests/mpn/t-hgcd_appr.c	2026-06-06 17:46:04.866151400 +0200
+@@ -255,7 +255,7 @@
+ 		     "expected: %Mx\n",
+ 		     hgcd_tp[hgcd_scratch], marker[3]);
+ 
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (!hgcd_appr_valid_p (a, b, res[0], &ref, ref_r0, ref_r1,
+@@ -267,7 +267,7 @@
+       fprintf (stderr, "op2=");                 debug_mp (b, -16);
+       fprintf (stderr, "hgcd_ref: %ld\n", (long) res[0]);
+       fprintf (stderr, "mpn_hgcd_appr: %ld\n", (long) res[1]);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   refmpn_free_limbs (hgcd_init_tp - 1);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-hgcd.c ./tests/mpn/t-hgcd.c
+--- ./tests/mpn/t-hgcd.c	2026-06-06 17:45:33.108156900 +0200
++++ ./tests/mpn/t-hgcd.c	2026-06-06 17:46:04.855147000 +0200
+@@ -88,7 +88,7 @@
+ 	  fprintf (stderr, "op2=");                 debug_mp (op2, -16);
+ 	  fprintf (stderr, "expected: %d\n", hgcd_values[i].res);
+ 	  fprintf (stderr, "hgcd:     %d\n", (int) res);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -248,7 +248,7 @@
+       fprintf (stderr, "op2=");                 debug_mp (b, -16);
+       fprintf (stderr, "hgcd_ref: %ld\n", (long) res[0]);
+       fprintf (stderr, "mpn_hgcd: %ld\n", (long) res[1]);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   if (res[0] > 0)
+     {
+@@ -260,7 +260,7 @@
+ 	  fprintf (stderr, "mpn_hgcd and hgcd_ref returned different values\n");
+ 	  fprintf (stderr, "op1=");                 debug_mp (a, -16);
+ 	  fprintf (stderr, "op2=");                 debug_mp (b, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-instrument.c ./tests/mpn/t-instrument.c
+--- ./tests/mpn/t-instrument.c	2026-06-06 17:45:33.132155000 +0200
++++ ./tests/mpn/t-instrument.c	2026-06-06 17:46:04.880662000 +0200
+@@ -64,7 +64,7 @@
+   if (ncall >= numberof (call))
+     {
+       printf ("__cyg_profile_func_enter: oops, call stack full, from %s\n", name);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   enter_seen = 1;
+@@ -85,7 +85,7 @@
+   if (ncall == 0)
+     {
+       printf ("__cyg_profile_func_exit: call stack empty, from %s\n", name);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   ncall--;
+@@ -96,7 +96,7 @@
+       printf ("          want %p\n", call[ncall].this_fn);
+       printf ("  call_site got  %p\n", call_site);
+       printf ("            want %p\n", call[ncall].call_site);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -115,7 +115,7 @@
+   if (! enter_seen)
+     {
+       printf ("did not reach __cyg_profile_func_enter from %s\n", name);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (ncall != old_ncall)
+@@ -123,7 +123,7 @@
+       printf ("unbalance enter/exit calls from %s\n", name);
+       printf ("  ncall     %d\n", ncall);
+       printf ("  old_ncall %d\n", old_ncall);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-invert.c ./tests/mpn/t-invert.c
+--- ./tests/mpn/t-invert.c	2026-06-06 17:45:33.144156600 +0200
++++ ./tests/mpn/t-invert.c	2026-06-06 17:46:04.893660000 +0200
+@@ -142,7 +142,7 @@
+ 	  mpn_dump (dp, n);
+ 	  mpn_dump (ip, n);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-iord_u.c ./tests/mpn/t-iord_u.c
+--- ./tests/mpn/t-iord_u.c	2026-06-06 17:45:33.157157200 +0200
++++ ./tests/mpn/t-iord_u.c	2026-06-06 17:46:04.906660500 +0200
+@@ -44,7 +44,7 @@
+       mpn_trace ("    n", &n,   (mp_size_t) 1);
+       mpn_trace ("  got", got,  size);
+       mpn_trace (" want", want, size);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-matrix22.c ./tests/mpn/t-matrix22.c
+--- ./tests/mpn/t-matrix22.c	2026-06-06 17:45:33.168665000 +0200
++++ ./tests/mpn/t-matrix22.c	2026-06-06 17:46:04.918667800 +0200
+@@ -158,7 +158,7 @@
+ 		   B->e00, B->n, B->e01, B->n, B->e10, B->n, B->e11, B->n,
+ 		   R.e00, R.n, R.e01, R.n, R.e10, R.n, R.e11, R.n,
+ 		   P.e00, P.n, P.e01, P.n, P.e10, P.n, P.e11, P.n);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+   refmpn_free_limbs (tp);
+   matrix_clear (&R);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-minvert.c ./tests/mpn/t-minvert.c
+--- ./tests/mpn/t-minvert.c	2026-06-06 17:45:33.180667200 +0200
++++ ./tests/mpn/t-minvert.c	2026-06-06 17:46:04.930659600 +0200
+@@ -123,7 +123,7 @@
+ 	  gmp_fprintf (stderr, "test %d: Not invertible!\n"
+ 		       "m = %Zd\n"
+ 		       "a = %Zd\n", test, m, a);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+       ASSERT_ALWAYS (! (test & 4) || rres);
+ 
+@@ -151,7 +151,7 @@
+ 	    gmp_fprintf (stderr, "got: %Nd\n", tp, n);
+ 	  if (ran != scratch[itch])
+ 	    fprintf (stderr, "scratch[itch] changed.\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mod_1.c ./tests/mpn/t-mod_1.c
+--- ./tests/mpn/t-mod_1.c	2026-06-06 17:45:33.192666300 +0200
++++ ./tests/mpn/t-mod_1.c	2026-06-06 17:46:04.942659500 +0200
+@@ -82,7 +82,7 @@
+       printf ("b           : "); mpn_dump (&b, 1);
+       printf ("r (expected): "); mpn_dump (&r_ref, 1);
+       printf ("r (bad)     : "); mpn_dump (&r, 1);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mp_bases.c ./tests/mpn/t-mp_bases.c
+--- ./tests/mpn/t-mp_bases.c	2026-06-06 17:45:33.203666400 +0200
++++ ./tests/mpn/t-mp_bases.c	2026-06-06 17:46:04.953661400 +0200
+@@ -34,14 +34,14 @@
+   if (MP_BASES_CHARS_PER_LIMB_10 != want_chars_per_limb)
+     {
+       printf ("MP_BASES_CHARS_PER_LIMB_10 wrong\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   want_bb = refmpn_big_base (10);
+   if (MP_BASES_BIG_BASE_10 != want_bb)
+     {
+       printf ("MP_BASES_BIG_BASE_10 wrong\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   want_bb_inv = refmpn_invert_limb
+@@ -49,14 +49,14 @@
+   if (MP_BASES_BIG_BASE_INVERTED_10 != want_bb_inv)
+     {
+       printf ("MP_BASES_BIG_BASE_INVERTED_10 wrong\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (MP_BASES_NORMALIZATION_STEPS_10
+       != refmpn_count_leading_zeros (MP_BASES_BIG_BASE_10))
+     {
+       printf ("MP_BASES_NORMALIZATION_STEPS_10 wrong\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   for (base = 2; base < numberof (mp_bases); base++)
+@@ -67,7 +67,7 @@
+           printf ("mp_bases[%d].chars_per_limb wrong\n", base);
+           printf ("  got  %d\n", mp_bases[base].chars_per_limb);
+           printf ("  want %d\n", want_chars_per_limb);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       if (POW2_P (base))
+@@ -76,7 +76,7 @@
+           if (mp_bases[base].big_base != want_bb)
+             {
+               printf ("mp_bases[%d].big_base (log2 of base) wrong\n", base);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+       else
+@@ -85,7 +85,7 @@
+           if (mp_bases[base].big_base != want_bb)
+             {
+               printf ("mp_bases[%d].big_base wrong\n", base);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+ 
+ #if USE_PREINV_DIVREM_1
+@@ -94,7 +94,7 @@
+           if (mp_bases[base].big_base_inverted != want_bb_inv)
+             {
+               printf ("mp_bases[%d].big_base_inverted wrong\n", base);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+ #endif
+         }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mul.c ./tests/mpn/t-mul.c
+--- ./tests/mpn/t-mul.c	2026-06-06 17:45:33.216667500 +0200
++++ ./tests/mpn/t-mul.c	2026-06-06 17:46:04.966664200 +0200
+@@ -87,7 +87,7 @@
+ 	      printf ("b: "); mpn_dump (bp, bn);
+ 	      printf ("r:   "); mpn_dump (rp, rn);
+ 	      printf ("ref: "); mpn_dump (refp, rn);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mullo.c ./tests/mpn/t-mullo.c
+--- ./tests/mpn/t-mullo.c	2026-06-06 17:45:33.228666500 +0200
++++ ./tests/mpn/t-mullo.c	2026-06-06 17:46:04.979177600 +0200
+@@ -123,7 +123,7 @@
+ 	  mpn_dump (pp, n);
+ 	  mpn_dump (refp, n);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mulmid.c ./tests/mpn/t-mulmid.c
+--- ./tests/mpn/t-mulmid.c	2026-06-06 17:45:33.240687300 +0200
++++ ./tests/mpn/t-mulmid.c	2026-06-06 17:46:04.991176800 +0200
+@@ -83,7 +83,7 @@
+ 	  printf("r:   "); mpn_dump (rp, rn);
+ 	  printf("ref: "); mpn_dump (refp, rn);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mulmod_bknp1.c ./tests/mpn/t-mulmod_bknp1.c
+--- ./tests/mpn/t-mulmod_bknp1.c	2026-06-06 17:45:33.252671100 +0200
++++ ./tests/mpn/t-mulmod_bknp1.c	2026-06-06 17:46:05.002176400 +0200
+@@ -193,7 +193,7 @@
+ 	  mpn_dump (pp, rn + 1);
+ 	  mpn_dump (refp, rn + 1);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-mulmod_bnm1.c ./tests/mpn/t-mulmod_bnm1.c
+--- ./tests/mpn/t-mulmod_bnm1.c	2026-06-06 17:45:33.264183300 +0200
++++ ./tests/mpn/t-mulmod_bnm1.c	2026-06-06 17:46:05.014177300 +0200
+@@ -201,7 +201,7 @@
+ 	  mpn_dump (pp, rn);
+ 	  mpn_dump (refp, rn);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-perfsqr.c ./tests/mpn/t-perfsqr.c
+--- ./tests/mpn/t-perfsqr.c	2026-06-06 17:45:33.275182600 +0200
++++ ./tests/mpn/t-perfsqr.c	2026-06-06 17:46:05.027181400 +0200
+@@ -66,7 +66,7 @@
+           printf ("  idx=%u\n", idx);
+           printf ("  got  %d\n", got);
+           printf ("  want %d\n", want[r]);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-scan.c ./tests/mpn/t-scan.c
+--- ./tests/mpn/t-scan.c	2026-06-06 17:45:33.286183400 +0200
++++ ./tests/mpn/t-scan.c	2026-06-06 17:46:05.039177100 +0200
+@@ -45,7 +45,7 @@
+           printf ("  got   %lu\n", got);
+           printf ("  want  %lu\n", want);
+           mpn_trace ("  x    ", x, SIZE);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+@@ -61,7 +61,7 @@
+           printf ("  got   %lu\n", got);
+           printf ("  want  %lu\n", want);
+           mpn_trace ("  x    ", x, SIZE);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-sizeinbase.c ./tests/mpn/t-sizeinbase.c
+--- ./tests/mpn/t-sizeinbase.c	2026-06-06 17:45:33.298183300 +0200
++++ ./tests/mpn/t-sizeinbase.c	2026-06-06 17:46:05.052176900 +0200
+@@ -76,7 +76,7 @@
+ 	  {
+ 	    printf ("ERROR in test %d, base = %d, exp = %d, res = %d\n",
+ 		    test, (int) a, (int) exp, (int) res);
+-	    abort();
++	    my_abort(__FILE__,__LINE__);
+ 	  }
+ 
+ 	mpn_sub_1 (pp, pp, pn, CNST_LIMB(1));
+@@ -88,7 +88,7 @@
+ 	  {
+ 	    printf ("ERROR in -1 test %d, base = %d, exp = %d, res = %d\n",
+ 		    test, (int) a, (int) exp, (int) res);
+-	    abort();
++	    my_abort(__FILE__,__LINE__);
+ 	  }
+       }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-sqrlo.c ./tests/mpn/t-sqrlo.c
+--- ./tests/mpn/t-sqrlo.c	2026-06-06 17:45:33.309184000 +0200
++++ ./tests/mpn/t-sqrlo.c	2026-06-06 17:46:05.063182000 +0200
+@@ -120,7 +120,7 @@
+ 	  mpn_dump (pp, n);
+ 	  mpn_dump (refp, n);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-sqrmod_bknp1.c ./tests/mpn/t-sqrmod_bknp1.c
+--- ./tests/mpn/t-sqrmod_bknp1.c	2026-06-06 17:45:33.320181500 +0200
++++ ./tests/mpn/t-sqrmod_bknp1.c	2026-06-06 17:46:05.077251400 +0200
+@@ -198,7 +198,7 @@
+ 	  mpn_dump (pp, rn + 1);
+ 	  mpn_dump (refp, rn + 1);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       mpn_random2 (pp-1, rn + 3);
+@@ -242,7 +242,7 @@
+ 	  mpn_dump (pp, rn + 1);
+ 	  mpn_dump (refp, rn + 1);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-sqrmod_bnm1.c ./tests/mpn/t-sqrmod_bnm1.c
+--- ./tests/mpn/t-sqrmod_bnm1.c	2026-06-06 17:45:33.333185000 +0200
++++ ./tests/mpn/t-sqrmod_bnm1.c	2026-06-06 17:46:05.090247000 +0200
+@@ -173,7 +173,7 @@
+ 	  mpn_dump (pp, rn);
+ 	  mpn_dump (refp, rn);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpn/t-toom2-sqr.c ./tests/mpn/t-toom2-sqr.c
+--- ./tests/mpn/t-toom2-sqr.c	2026-06-06 17:45:33.345186300 +0200
++++ ./tests/mpn/t-toom2-sqr.c	2026-06-06 17:46:05.101248000 +0200
+@@ -79,7 +79,7 @@
+ 	  mpn_dump (pp, an * 2);
+ 	  mpn_dump (refp, an * 2);
+ 
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   TMP_FREE;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/io.c ./tests/mpq/io.c
+--- ./tests/mpq/io.c	2026-06-06 17:45:33.547538800 +0200
++++ ./tests/mpq/io.c	2026-06-06 17:46:05.295284800 +0200
+@@ -39,6 +39,11 @@
+ int
+ main (int argc, char **argv)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   mpq_t  op1, op2;
+   mp_size_t size;
+   int i;
+@@ -91,7 +96,7 @@
+ 	  || fflush (fp) != 0)
+ 	{
+ 	  printf ("mpq_out_str write error\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       rewind (fp);
+@@ -102,7 +107,7 @@
+ 	    printf ("mpq_inp_str stream read error\n");
+ 	  else
+ 	    printf ("mpq_inp_str data conversion error\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (nread != ftell(fp))
+@@ -110,7 +115,7 @@
+ 	  printf ("mpq_inp_str nread doesn't match ftell\n");
+ 	  printf ("  nread  %lu\n", (unsigned long) nread);
+ 	  printf ("  ftell  %ld\n", ftell(fp));
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (mpq_cmp (op1, op2))
+@@ -119,7 +124,7 @@
+ 	  printf ("op1  = "); debug_mp (op1, -16);
+ 	  printf ("op2  = "); debug_mp (op2, -16);
+ 	  printf ("base = %d\n", base);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -133,4 +138,5 @@
+ 
+   tests_end ();
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/reuse.c ./tests/mpq/reuse.c
+--- ./tests/mpq/reuse.c	2026-06-06 17:45:33.586055700 +0200
++++ ./tests/mpq/reuse.c	2026-06-06 17:46:05.308292100 +0200
+@@ -239,7 +239,7 @@
+   printf ("failure in %s:\n", name);
+   mpq_trace ("  res1  ", res1);
+   mpq_trace ("  res2  ", res2);
+-  abort ();
++  my_abort (__FILE__,__LINE__);
+ }
+ 
+ #endif /* ! DLL_EXPORT */
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-aors.c ./tests/mpq/t-aors.c
+--- ./tests/mpq/t-aors.c	2026-06-06 17:45:33.599055100 +0200
++++ ./tests/mpq/t-aors.c	2026-06-06 17:46:05.321284700 +0200
+@@ -55,7 +55,7 @@
+                   mpq_trace ("  y   ", y);
+                   mpq_trace ("  got ", got);
+                   mpq_trace ("  want", want_add);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+ 
+               mpq_sub (got, x, y);
+@@ -67,7 +67,7 @@
+                   mpq_trace ("  y   ", y);
+                   mpq_trace ("  got ", got);
+                   mpq_trace ("  want", want_sub);
+-                  abort ();
++                  my_abort (__FILE__,__LINE__);
+                 }
+ 
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-cmp.c ./tests/mpq/t-cmp.c
+--- ./tests/mpq/t-cmp.c	2026-06-06 17:45:33.610052300 +0200
++++ ./tests/mpq/t-cmp.c	2026-06-06 17:46:05.333284500 +0200
+@@ -90,7 +90,7 @@
+       cc = mpq_cmp (a, b);
+ 
+       if (SGN (ccref) != SGN (cc))
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpq_clear (a);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-cmp_si.c ./tests/mpq/t-cmp_si.c
+--- ./tests/mpq/t-cmp_si.c	2026-06-06 17:45:33.622052700 +0200
++++ ./tests/mpq/t-cmp_si.c	2026-06-06 17:46:05.345286700 +0200
+@@ -88,7 +88,7 @@
+           printf ("  d=%lu\n", data[i].d);
+           printf ("  got=%d\n", got);
+           printf ("  want=%d\n", data[i].want);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       if (data[i].n == 0)
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-cmp_ui.c ./tests/mpq/t-cmp_ui.c
+--- ./tests/mpq/t-cmp_ui.c	2026-06-06 17:45:33.634052800 +0200
++++ ./tests/mpq/t-cmp_ui.c	2026-06-06 17:46:05.359293200 +0200
+@@ -90,13 +90,13 @@
+       cc = mpq_cmp_ui (a, 1, 1);
+ 
+       if (SGN (ccref) != SGN (cc))
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+ 
+       ccref = ref_mpq_cmp_ui (a, 0, 1);
+       cc = mpq_cmp_ui (a, 0, 1);
+ 
+       if (SGN (ccref) != SGN (cc))
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+ 
+       bn = mpz_get_ui (NUM (b));
+       bd = mpz_get_ui (DEN (b));
+@@ -105,7 +105,7 @@
+       cc = mpq_cmp_ui (a, bn, bd);
+ 
+       if (SGN (ccref) != SGN (cc))
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpq_clear (a);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-cmp_z.c ./tests/mpq/t-cmp_z.c
+--- ./tests/mpq/t-cmp_z.c	2026-06-06 17:45:33.646064100 +0200
++++ ./tests/mpq/t-cmp_z.c	2026-06-06 17:46:05.371423700 +0200
+@@ -80,7 +80,7 @@
+ 		  if (ccref != SGN (cc))
+ 		    {
+ 		      fprintf (stderr, "i=%i, j=%i, k=%i, m=%i, s=%i\n; ccref= %i, cc= %i\n", i, j, k, m, s, ccref, cc);
+-		      abort ();
++		      my_abort (__FILE__,__LINE__);
+ 		    }
+ 
+ 		  mpq_neg (a, a);
+@@ -135,7 +135,7 @@
+       cc = mpq_cmp_z (a, b);
+ 
+       if (SGN (ccref) != SGN (cc))
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpq_clear (a);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-equal.c ./tests/mpq/t-equal.c
+--- ./tests/mpq/t-equal.c	2026-06-06 17:45:33.657063300 +0200
++++ ./tests/mpq/t-equal.c	2026-06-06 17:46:05.383426000 +0200
+@@ -37,7 +37,7 @@
+       printf ("mpq_equal got %d want %d\n", got, want);
+       mpq_trace ("x", x);
+       mpq_trace ("y", y);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-get_d.c ./tests/mpq/t-get_d.c
+--- ./tests/mpq/t-get_d.c	2026-06-06 17:45:33.669575300 +0200
++++ ./tests/mpq/t-get_d.c	2026-06-06 17:46:05.396425000 +0200
+@@ -93,7 +93,7 @@
+ 	      printf ("\nERROR (test %d/%d): bad mpq_get_d results\n", i, j);
+ 	      printf ("last: %.16g\n", last_d);
+ 	      printf (" new: %.16g\n", new_d); dump (a);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	  mpq_set_d (qnew_d, new_d);
+ 	  MPQ_CHECK_FORMAT (qnew_d);
+@@ -102,7 +102,7 @@
+ 	      printf ("ERROR (test %d/%d): bad mpq_set_d results\n", i, j);
+ 	      printf ("last: %.16g\n", last_d); dump (qlast_d);
+ 	      printf (" new: %.16g\n", new_d); dump (qnew_d);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	  last_d = new_d;
+ 	  mpq_set (qlast_d, qnew_d);
+@@ -203,7 +203,7 @@
+ 	  printf ("ERROR (check_random test %d): bad mpq_set_d results\n", test);
+ 	  printf ("%.16g\n", d);
+ 	  gmp_printf ("%Qd\n", q);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+   mpq_clear (q);
+@@ -273,7 +273,7 @@
+ 	      mpq_trace ("   q    ", q);
+ 	      d_trace   ("   want ", want);
+ 	      d_trace   ("   got  ", got);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-get_str.c ./tests/mpq/t-get_str.c
+--- ./tests/mpq/t-get_str.c	2026-06-06 17:45:33.681575200 +0200
++++ ./tests/mpq/t-get_str.c	2026-06-06 17:46:05.408432400 +0200
+@@ -44,7 +44,7 @@
+       printf ("  base %d\n", base);
+       printf ("  got  size %lu \"%s\"\n", (unsigned long)  strlen(str)+1, str);
+       printf ("  want size %lu\n", (unsigned long) str_alloc);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   if (strcmp (str, want) != 0)
+     {
+@@ -53,7 +53,7 @@
+       printf ("  got  \"%s\"\n", str);
+       printf ("  want \"%s\"\n", want);
+       mpq_trace ("  q", q);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   (*__gmp_free_func) (str, strlen (str) + 1);
+ 
+@@ -66,7 +66,7 @@
+       printf ("  base %d\n", base);
+       printf ("  got  %p\n", (void *) ret);
+       printf ("  want %p\n", (void *) str);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   if (strcmp (str, want) != 0)
+     {
+@@ -74,7 +74,7 @@
+       printf ("  base %d\n", base);
+       printf ("  got  \"%s\"\n", str);
+       printf ("  want \"%s\"\n", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   (*__gmp_free_func) (str, str_alloc);
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-inp_str.c ./tests/mpq/t-inp_str.c
+--- ./tests/mpq/t-inp_str.c	2026-06-06 17:45:33.695574200 +0200
++++ ./tests/mpq/t-inp_str.c	2026-06-06 17:46:05.421428100 +0200
+@@ -110,7 +110,7 @@
+ 		  printf ("  base         %d\n", data[i].base);
+ 		  printf ("  got_nread    %d\n", got_nread);
+ 		  printf ("  ftell_nread  %ld\n", ftell_nread);
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 	    }
+ 
+@@ -123,7 +123,7 @@
+ 		  printf ("  inp         \"%s\"\n", data[i].inp);
+ 		  printf ("  base        %d\n", data[i].base);
+ 		  printf ("  c '%c' %#x\n", c, c);
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 	    }
+ 
+@@ -134,7 +134,7 @@
+ 	      printf ("  base        %d\n", data[i].base);
+ 	      printf ("  got_nread   %d\n", got_nread);
+ 	      printf ("  want_nread  %d\n", data[i].want_nread);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  MPQ_CHECK_FORMAT (got);
+@@ -146,7 +146,7 @@
+ 	      printf ("  base  %d\n", data[i].base);
+ 	      mpq_trace ("  got ",  got);
+ 	      mpq_trace ("  want", want);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  ASSERT_ALWAYS (fclose (fp) == 0);
+@@ -160,6 +160,9 @@
+ int
+ main (void)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++	return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   tests_start ();
+ 
+   check_data ();
+@@ -168,4 +171,5 @@
+   tests_end ();
+ 
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-md_2exp.c ./tests/mpq/t-md_2exp.c
+--- ./tests/mpq/t-md_2exp.c	2026-06-06 17:45:33.719575500 +0200
++++ ./tests/mpq/t-md_2exp.c	2026-06-06 17:46:05.445426100 +0200
+@@ -73,7 +73,7 @@
+       if (mpq_cmp (r, q) < 0)
+ 	{
+ 	  printf ("mpq_mul_2exp wrong on random\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       mpq_div_2exp (r, r, shift);
+@@ -81,7 +81,7 @@
+       if (mpq_cmp (r, q) != 0)
+ 	{
+ 	  printf ("mpq_mul_2exp or mpq_div_2exp wrong on random\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+   mpq_clear (q);
+@@ -226,7 +226,7 @@
+                       mpq_out_str (stdout, 16, want);
+                       printf (" (hex)\n");
+ 
+-                      abort ();
++                      my_abort (__FILE__,__LINE__);
+                     }
+                 }
+             }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-set_f.c ./tests/mpq/t-set_f.c
+--- ./tests/mpq/t-set_f.c	2026-06-06 17:45:33.729575400 +0200
++++ ./tests/mpq/t-set_f.c	2026-06-06 17:46:05.456429700 +0200
+@@ -153,7 +153,7 @@
+               mpz_out_str (stdout, 16, mpq_denref(got));
+               printf ("\n");
+ 
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpq/t-set_str.c ./tests/mpq/t-set_str.c
+--- ./tests/mpq/t-set_str.c	2026-06-06 17:45:33.740575900 +0200
++++ ./tests/mpq/t-set_str.c	2026-06-06 17:46:05.468429600 +0200
+@@ -38,7 +38,7 @@
+       printf ("mpq_set_str unexpectedly failed\n");
+       printf ("  base %d\n", base);
+       printf ("  str  \"%s\"\n", str);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   MPQ_CHECK_FORMAT (got);
+ 
+@@ -49,7 +49,7 @@
+       printf ("  str  \"%s\"\n", str);
+       mpq_trace ("got ", got);
+       mpq_trace ("want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpq_clear (got);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/convert.c ./tests/mpz/convert.c
+--- ./tests/mpz/convert.c	2026-06-06 17:45:33.754583800 +0200
++++ ./tests/mpz/convert.c	2026-06-06 17:46:05.482522900 +0200
+@@ -119,7 +119,7 @@
+ 	  fprintf (stderr, "base = %d\n", base);
+ 	  fprintf (stderr, "op1  = "); debug_mp (op1, -16);
+ 	  fprintf (stderr, "op2  = "); debug_mp (op2, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       (*__gmp_free_func) (str, strlen (str) + 1);
+@@ -149,7 +149,7 @@
+ 	  fprintf (stderr, "buf  = %s\n", buf);
+ 	  fprintf (stderr, "base = %d\n", base);
+ 	  fprintf (stderr, "op1  = "); debug_mp (op1, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       (*__gmp_free_func) (buf, len + 1);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/dive.c ./tests/mpz/dive.c
+--- ./tests/mpz/dive.c	2026-06-06 17:45:33.766856800 +0200
++++ ./tests/mpz/dive.c	2026-06-06 17:46:05.494523300 +0200
+@@ -85,7 +85,7 @@
+           mpz_trace ("  want    ", op1);
+           mpz_trace ("  dividend", prod);
+           mpz_trace ("  divisor ", op2);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/dive_ui.c ./tests/mpz/dive_ui.c
+--- ./tests/mpz/dive_ui.c	2026-06-06 17:45:33.777855000 +0200
++++ ./tests/mpz/dive_ui.c	2026-06-06 17:46:05.507523500 +0200
+@@ -59,7 +59,7 @@
+               printf    ("    d=%lu\n", d);
+               mpz_trace ("    q", q);
+               mpz_trace ("  got", got);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+ 
+           mpz_neg (q, q);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/io.c ./tests/mpz/io.c
+--- ./tests/mpz/io.c	2026-06-06 17:45:33.788856700 +0200
++++ ./tests/mpz/io.c	2026-06-06 17:46:05.519527600 +0200
+@@ -40,6 +40,11 @@
+ int
+ main (int argc, char **argv)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++  (void)argc;
++  (void)argv;
++  return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   mpz_t  op1, op2;
+   mp_size_t size;
+   int i;
+@@ -67,13 +72,13 @@
+   if (mpz_out_str (fp, 63, op1) != 0)
+     {
+       printf ("mpz_out_str did not return 0 (error) with base > 62\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (mpz_out_str (fp, -37, op1) != 0)
+     {
+       printf ("mpz_out_str did not return 0 (error) with base < -37\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   for (i = 0; i < reps; i++)
+@@ -106,7 +111,7 @@
+ 	  || fflush (fp) != 0)
+ 	{
+ 	  printf ("mpz_out_str write error\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       rewind (fp);
+@@ -117,7 +122,7 @@
+ 	    printf ("mpz_inp_str stream read error\n");
+ 	  else
+ 	    printf ("mpz_inp_str data conversion error\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (nread != ftell(fp))
+@@ -125,7 +130,7 @@
+ 	  printf ("mpz_inp_str nread doesn't match ftell\n");
+ 	  printf ("  nread  %lu\n", (unsigned long) nread);
+ 	  printf ("  ftell  %ld\n", ftell(fp));
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (mpz_cmp (op1, op2))
+@@ -134,7 +139,7 @@
+ 	  printf ("op1  = "); debug_mp (op1, -16);
+ 	  printf ("op2  = "); debug_mp (op2, -16);
+ 	  printf ("base = %d\n", base);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -148,4 +153,5 @@
+ 
+   tests_end ();
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/logic.c ./tests/mpz/logic.c
+--- ./tests/mpz/logic.c	2026-06-06 17:45:33.801856000 +0200
++++ ./tests/mpz/logic.c	2026-06-06 17:46:05.531529700 +0200
+@@ -23,7 +23,6 @@
+ #include "gmp-impl.h"
+ #include "tests.h"
+ 
+-void dump_abort (void);
+ void debug_mp (mpz_t, int);
+ 
+ int
+@@ -63,34 +62,34 @@
+       mpz_and (r1, x, x);
+       MPZ_CHECK_FORMAT (r1);
+       if (mpz_cmp (r1, x) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_ior (r2, x, x);
+       MPZ_CHECK_FORMAT (r2);
+       if (mpz_cmp (r2, x) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_xor (t1, x, x);
+       MPZ_CHECK_FORMAT (t1);
+       if (mpz_cmp_si (t1, 0) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_ior (t1, x, y);
+       MPZ_CHECK_FORMAT (t1);
+       if (mpz_cmp (t1, x) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_xor (t2, x, y);
+       MPZ_CHECK_FORMAT (t2);
+       if (mpz_cmp (t2, x) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_com (t2, x);
+       MPZ_CHECK_FORMAT (t2);
+       mpz_xor (t3, t2, x);
+       MPZ_CHECK_FORMAT (t3);
+       if (mpz_cmp_si (t3, -1) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+     }
+ 
+   for (i = 0; i < reps; i++)
+@@ -119,14 +118,14 @@
+       mpz_com (r1, r1);
+       MPZ_CHECK_FORMAT (r1);
+       if (mpz_cmp (r1, x) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_com (r1, y);
+       MPZ_CHECK_FORMAT (r1);
+       mpz_com (r2, r1);
+       MPZ_CHECK_FORMAT (r2);
+       if (mpz_cmp (r2, y) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_com (t1, x);
+       MPZ_CHECK_FORMAT (t1);
+@@ -139,7 +138,7 @@
+       mpz_ior (r2, x, y);
+       MPZ_CHECK_FORMAT (r2);
+       if (mpz_cmp (r1, r2) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_com (t1, x);
+       MPZ_CHECK_FORMAT (t1);
+@@ -152,7 +151,7 @@
+       mpz_and (r2, x, y);
+       MPZ_CHECK_FORMAT (r2);
+       if (mpz_cmp (r1, r2) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+ 
+       mpz_ior (t1, x, y);
+       MPZ_CHECK_FORMAT (t1);
+@@ -165,7 +164,7 @@
+       mpz_xor (r2, x, y);
+       MPZ_CHECK_FORMAT (r2);
+       if (mpz_cmp (r1, r2) != 0)
+-	dump_abort ();
++	      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (bs);
+@@ -182,12 +181,6 @@
+ }
+ 
+ void
+-dump_abort ()
+-{
+-  abort();
+-}
+-
+-void
+ debug_mp (mpz_t x, int base)
+ {
+   mpz_out_str (stderr, base, x); fputc ('\n', stderr);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-addsub.c ./tests/mpz/t-addsub.c
+--- ./tests/mpz/t-addsub.c	2026-06-06 17:45:33.855382400 +0200
++++ ./tests/mpz/t-addsub.c	2026-06-06 17:46:05.556531500 +0200
+@@ -111,7 +111,7 @@
+   fprintf (stderr, "ERROR: %s in test %d\n", s, i);
+   fprintf (stderr, "op1 = "); debug_mp (op1, -16);
+   fprintf (stderr, "op2 = "); debug_mp (op2, -16);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-aorsmul.c ./tests/mpz/t-aorsmul.c
+--- ./tests/mpz/t-aorsmul.c	2026-06-06 17:45:33.867901400 +0200
++++ ./tests/mpz/t-aorsmul.c	2026-06-06 17:46:05.567538100 +0200
+@@ -50,7 +50,7 @@
+       mpz_trace ("y", y);
+       mpz_trace ("want", want);
+       mpz_trace ("got ", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_mul (want, w, y);
+@@ -89,7 +89,7 @@
+       printf    ("y=0x%lX   %lu\n", y, y);
+       mpz_trace ("want", want);
+       mpz_trace ("got ", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_mul_ui (want, w, y);
+@@ -152,7 +152,7 @@
+       mpz_trace ("y", y);
+       mpz_trace ("want", want);
+       mpz_trace ("got ", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+ 
+@@ -192,7 +192,7 @@
+       mpz_trace ("x", x);
+       mpz_trace ("want", want);
+       mpz_trace ("got ", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_sub (want, want, w);
+@@ -232,7 +232,7 @@
+       printf    ("y=0x%lX   %lu\n", y, y);
+       mpz_trace ("want", want);
+       mpz_trace ("got ", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_mul_ui (want, x, y);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-bin.c ./tests/mpz/t-bin.c
+--- ./tests/mpz/t-bin.c	2026-06-06 17:45:33.879899100 +0200
++++ ./tests/mpz/t-bin.c	2026-06-06 17:46:05.580054500 +0200
+@@ -40,7 +40,7 @@
+       printf ("  k=%lu\n", k);
+       printf ("  got="); mpz_out_str (stdout, 10, got); printf ("\n");
+       printf ("  want="); mpz_out_str (stdout, 10, want); printf ("\n");
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+   mpz_clear (got);
+ }
+@@ -61,7 +61,7 @@
+       printf ("  k=%lu\n", k);
+       printf ("  got="); mpz_out_str (stdout, 10, got); printf ("\n");
+       printf ("  want="); mpz_out_str (stdout, 10, want); printf ("\n");
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+   mpz_clear (got);
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-bit.c ./tests/mpz/t-bit.c
+--- ./tests/mpz/t-bit.c	2026-06-06 17:45:33.893899700 +0200
++++ ./tests/mpz/t-bit.c	2026-06-06 17:46:05.593046100 +0200
+@@ -80,7 +80,7 @@
+ 	      printf ("wrong after extension\n");
+ 	      mpz_trace ("got ", got);
+ 	      mpz_trace ("want", want);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  /* complement bit n, going back to ..11100..00 which is -2^(n-1) */
+@@ -102,7 +102,7 @@
+ 	      printf ("wrong after shrinking\n");
+ 	      mpz_trace ("got ", got);
+ 	      mpz_trace ("want", want);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+@@ -152,7 +152,7 @@
+ 	  printf    ("bit %lu\n", data[i].bit);
+ 	  mpz_trace ("got ", got);
+ 	  mpz_trace ("want", want);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -236,7 +236,7 @@
+ 	      if (mpz_tstbit (x, bit) != 0)
+ 		{
+ 		  printf ("check_single(): expected 0\n");
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      mpz_setbit (x, bit);
+@@ -244,7 +244,7 @@
+ 	      if (mpz_tstbit (x, bit) != 1)
+ 		{
+ 		  printf ("check_single(): expected 1\n");
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      mpz_clrbit (x, bit);
+@@ -252,7 +252,7 @@
+ 	      if (mpz_tstbit (x, bit) != 0)
+ 		{
+ 		  printf ("check_single(): expected 0\n");
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      mpz_combit (x, bit);
+@@ -260,7 +260,7 @@
+ 	      if (mpz_tstbit (x, bit) != 1)
+ 		{
+ 		  printf ("check_single(): expected 1\n");
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      mpz_combit (x, bit);
+@@ -268,7 +268,7 @@
+ 	      if (mpz_tstbit (x, bit) != 0)
+ 		{
+ 		  printf ("check_single(): expected 0\n");
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 	    }
+ 	}
+@@ -332,42 +332,42 @@
+       if (bit0 == 0)
+ 	{
+ 	  if (mpz_cmp (s0, s1) == 0 || mpz_cmp (s0, s2) != 0 || mpz_cmp (s0, s3) == 0)
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 	}
+       else
+ 	{
+ 	  if (mpz_cmp (s0, s1) != 0 || mpz_cmp (s0, s2) == 0 || mpz_cmp (s0, s3) != 0)
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (mpz_cmp (s1, s2) == 0 || mpz_cmp (s1, s3) != 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+       if (mpz_cmp (s2, s3) == 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+ 
+       mpz_combit (x, bitindex);
+       MPZ_CHECK_FORMAT (x);
+       if (mpz_cmp (s2, x) != 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+ 
+       mpz_clrbit (x, bitindex);
+       MPZ_CHECK_FORMAT (x);
+       if (mpz_cmp (s2, x) != 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+ 
+       mpz_ui_pow_ui (m, 2L, bitindex);
+       MPZ_CHECK_FORMAT (m);
+       mpz_ior (x, s0, m);
+       MPZ_CHECK_FORMAT (x);
+       if (mpz_cmp (x, s3) != 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+ 
+       mpz_com (m, m);
+       MPZ_CHECK_FORMAT (m);
+       mpz_and (x, s0, m);
+       MPZ_CHECK_FORMAT (x);
+       if (mpz_cmp (x, s2) != 0)
+-	abort ();
++	my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (x);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-cdiv_ui.c ./tests/mpz/t-cdiv_ui.c
+--- ./tests/mpz/t-cdiv_ui.c	2026-06-06 17:45:33.906901100 +0200
++++ ./tests/mpz/t-cdiv_ui.c	2026-06-06 17:46:05.605044800 +0200
+@@ -148,7 +148,7 @@
+   fprintf (stderr, "ERROR: %s\n", str);
+   fprintf (stderr, "dividend = "); debug_mp (dividend, -16);
+   fprintf (stderr, "divisor  = %lX\n", divisor);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-cmp.c ./tests/mpz/t-cmp.c
+--- ./tests/mpz/t-cmp.c	2026-06-06 17:45:33.919899200 +0200
++++ ./tests/mpz/t-cmp.c	2026-06-06 17:46:05.619048000 +0200
+@@ -40,7 +40,7 @@
+       printf ("mpz_cmp got %d want %d\n", got, want_cmp);
+       mpz_trace ("x", x);
+       mpz_trace ("y", y);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   got = mpz_cmpabs (x, y);
+@@ -51,7 +51,7 @@
+       printf ("mpz_cmpabs got %d want %d\n", got, want_cmpabs);
+       mpz_trace ("x", x);
+       mpz_trace ("y", y);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-cmp_d.c ./tests/mpz/t-cmp_d.c
+--- ./tests/mpz/t-cmp_d.c	2026-06-06 17:45:33.931902400 +0200
++++ ./tests/mpz/t-cmp_d.c	2026-06-06 17:46:05.630046100 +0200
+@@ -54,7 +54,7 @@
+       for (i = 0; i < sizeof(y); i++)
+         printf (" %02X", (unsigned) ((unsigned char *) &y)[i]);
+       printf ("\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   got = mpz_cmpabs_d (x, y);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-cmp_si.c ./tests/mpz/t-cmp_si.c
+--- ./tests/mpz/t-cmp_si.c	2026-06-06 17:45:33.944903200 +0200
++++ ./tests/mpz/t-cmp_si.c	2026-06-06 17:46:05.642045200 +0200
+@@ -79,7 +79,7 @@
+ 	      printf ("  b=%ld\n", b);
+ 	      printf ("  got=%d\n", got);
+ 	      printf ("  want=%d\n", data[i].want);
+-	      abort();
++	      my_abort(__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-cong_2exp.c ./tests/mpz/t-cong_2exp.c
+--- ./tests/mpz/t-cong_2exp.c	2026-06-06 17:45:33.968080500 +0200
++++ ./tests/mpz/t-cong_2exp.c	2026-06-06 17:46:05.668059200 +0200
+@@ -57,7 +57,7 @@
+           mpz_trace (" a-c", diff);
+           mpz_trace (" 2^d", d2exp);
+           printf    ("   d=0x%lX\n", d);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       MPZ_SRCPTR_SWAP (a, c);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-cong.c ./tests/mpz/t-cong.c
+--- ./tests/mpz/t-cong.c	2026-06-06 17:45:33.955907200 +0200
++++ ./tests/mpz/t-cong.c	2026-06-06 17:46:05.655054100 +0200
+@@ -43,7 +43,7 @@
+ 	  mpz_trace ("	 a", a);
+ 	  mpz_trace ("	 c", c);
+ 	  mpz_trace ("	 d", d);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (mpz_fits_ulong_p (c) && mpz_fits_ulong_p (d))
+@@ -62,7 +62,7 @@
+ 	      mpz_trace ("   a", a);
+ 	      printf	("   c=0x%lX\n", uc);
+ 	      printf	("   d=0x%lX\n", ud);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-div_2exp.c ./tests/mpz/t-div_2exp.c
+--- ./tests/mpz/t-div_2exp.c	2026-06-06 17:45:34.003080800 +0200
++++ ./tests/mpz/t-div_2exp.c	2026-06-06 17:46:05.703583700 +0200
+@@ -129,7 +129,7 @@
+   mpz_trace ("r", r);
+   mpz_trace ("p", p);
+ 
+-  abort ();
++  my_abort (__FILE__,__LINE__);
+ }
+ 
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-divis_2exp.c ./tests/mpz/t-divis_2exp.c
+--- ./tests/mpz/t-divis_2exp.c	2026-06-06 17:45:33.992081200 +0200
++++ ./tests/mpz/t-divis_2exp.c	2026-06-06 17:46:05.691576100 +0200
+@@ -40,7 +40,7 @@
+       mp_trace_base = -16;
+       mpz_trace ("   a", a);
+       printf    ("   d=0x%lX\n", d);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-divis.c ./tests/mpz/t-divis.c
+--- ./tests/mpz/t-divis.c	2026-06-06 17:45:33.980081600 +0200
++++ ./tests/mpz/t-divis.c	2026-06-06 17:46:05.679575200 +0200
+@@ -42,7 +42,7 @@
+           mp_trace_base = -16;
+           mpz_trace ("   a", a);
+           printf ("   d=0x%lX\n", u);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+@@ -56,7 +56,7 @@
+       mp_trace_base = -16;
+       mpz_trace ("   a", a);
+       mpz_trace ("   d", d);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-export.c ./tests/mpz/t-export.c
+--- ./tests/mpz/t-export.c	2026-06-06 17:45:34.015078500 +0200
++++ ./tests/mpz/t-export.c	2026-06-06 17:46:05.715575300 +0200
+@@ -184,7 +184,7 @@
+ 	      for (j = 0; j < got_count*data[i].size; j++)
+ 		printf (" 0x%02X,", (unsigned) (unsigned char) got_data[j]);
+ 	      printf ("\n");
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-fac_ui.c ./tests/mpz/t-fac_ui.c
+--- ./tests/mpz/t-fac_ui.c	2026-06-06 17:45:34.027092700 +0200
++++ ./tests/mpz/t-fac_ui.c	2026-06-06 17:46:05.728575400 +0200
+@@ -63,7 +63,7 @@
+           printf ("mpz_fac_ui(%lu) wrong\n", n);
+           printf ("  got  "); mpz_out_str (stdout, 10, r); printf("\n");
+           printf ("  want "); mpz_out_str (stdout, 10, f); printf("\n");
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       mpz_2fac_ui (r, n);
+@@ -74,7 +74,7 @@
+           printf ("mpz_2fac_ui(%lu) wrong\n", n);
+           printf ("  got  "); mpz_out_str (stdout, 10, r); printf("\n");
+           printf ("  want "); mpz_out_str (stdout, 10, df[m]); printf("\n");
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       m ^= 1;
+@@ -94,7 +94,7 @@
+     {
+       printf ("mpz_fac_ui(%lu) wrong\n", n / 2);
+       printf (" al-Haytham's theorem not verified: got %lu, expected %lu.\n", m, n - 1);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (df[0]);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-fdiv.c ./tests/mpz/t-fdiv.c
+--- ./tests/mpz/t-fdiv.c	2026-06-06 17:45:34.039081600 +0200
++++ ./tests/mpz/t-fdiv.c	2026-06-06 17:46:05.740575500 +0200
+@@ -136,7 +136,7 @@
+   fprintf (stderr, "ERROR\n");
+   fprintf (stderr, "dividend = "); debug_mp (dividend, -16);
+   fprintf (stderr, "divisor  = "); debug_mp (divisor, -16);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-fdiv_ui.c ./tests/mpz/t-fdiv_ui.c
+--- ./tests/mpz/t-fdiv_ui.c	2026-06-06 17:45:34.052086100 +0200
++++ ./tests/mpz/t-fdiv_ui.c	2026-06-06 17:46:05.752575600 +0200
+@@ -148,7 +148,7 @@
+   fprintf (stderr, "ERROR: %s\n", str);
+   fprintf (stderr, "dividend = "); debug_mp (dividend, -16);
+   fprintf (stderr, "divisor  = %lX\n", divisor);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-fib_ui.c ./tests/mpz/t-fib_ui.c
+--- ./tests/mpz/t-fib_ui.c	2026-06-06 17:45:34.064149700 +0200
++++ ./tests/mpz/t-fib_ui.c	2026-06-06 17:46:05.765582600 +0200
+@@ -62,7 +62,7 @@
+           printf ("FIB_TABLE(%d) wrong\n", i);
+           gmp_printf ("  got  %#Nx\n", &FIB_TABLE(i), 1);
+           gmp_printf ("  want %#Nx\n", &want, 1);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ }
+@@ -96,9 +96,13 @@
+       if (MPZ_FIB_SIZE_FLOAT (n) < SIZ(want_fn))
+         {
+           printf ("MPZ_FIB_SIZE_FLOAT wrong at n=%lu\n", n);
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++          printf("  MPZ_FIB_SIZE_FLOAT  %lld\n", MPZ_FIB_SIZE_FLOAT(n));
++#else
+           printf ("  MPZ_FIB_SIZE_FLOAT  %ld\n", MPZ_FIB_SIZE_FLOAT (n));
++#endif
+           printf ("  SIZ(want_fn)        %d\n", SIZ(want_fn));
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* check MPN_FIB2_SIZE seems right, compared to actual size and
+@@ -106,16 +110,25 @@
+       if (MPN_FIB2_SIZE (n) < MPZ_FIB_SIZE_FLOAT (n))
+         {
+           printf ("MPN_FIB2_SIZE wrong at n=%lu\n", n);
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++          printf("  MPN_FIB2_SIZE       %lld\n", MPN_FIB2_SIZE(n));
++          printf("  MPZ_FIB_SIZE_FLOAT  %lld\n", MPZ_FIB_SIZE_FLOAT(n));
++#else
+           printf ("  MPN_FIB2_SIZE       %ld\n", MPN_FIB2_SIZE (n));
+           printf ("  MPZ_FIB_SIZE_FLOAT  %ld\n", MPZ_FIB_SIZE_FLOAT (n));
+-          abort ();
++#endif
++          my_abort (__FILE__,__LINE__);
+         }
+       if (MPN_FIB2_SIZE (n) < SIZ(want_fn))
+         {
+           printf ("MPN_FIB2_SIZE wrong at n=%lu\n", n);
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++          printf("  MPN_FIB2_SIZE  %lld\n", MPN_FIB2_SIZE(n));
++#else
+           printf ("  MPN_FIB2_SIZE  %ld\n", MPN_FIB2_SIZE (n));
++#endif
+           printf ("  SIZ(want_fn)   %d\n", SIZ(want_fn));
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       mpz_fib2_ui (got_fn, got_fn1, n);
+@@ -128,7 +141,7 @@
+           mpz_trace ("got  fn ",  got_fn);
+           mpz_trace ("want fn1", want_fn1);
+           mpz_trace ("got  fn1",  got_fn1);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       mpz_fib_ui (got_fn, n);
+@@ -138,7 +151,7 @@
+           printf ("mpz_fib_ui(%lu) wrong\n", n);
+           mpz_trace ("want fn", want_fn);
+           mpz_trace ("got  fn", got_fn);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       mpz_add (want_fn1, want_fn1, want_fn);  /* F[n+1] = F[n] + F[n-1] */
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-fits.c ./tests/mpz/t-fits.c
+--- ./tests/mpz/t-fits.c	2026-06-06 17:45:34.075152500 +0200
++++ ./tests/mpz/t-fits.c	2026-06-06 17:46:05.777838900 +0200
+@@ -189,7 +189,7 @@
+ 
+ 
+   if (error)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   mpz_clear (z);
+   tests_end ();
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-gcd.c ./tests/mpz/t-gcd.c
+--- ./tests/mpz/t-gcd.c	2026-06-06 17:45:34.087151200 +0200
++++ ./tests/mpz/t-gcd.c	2026-06-06 17:46:05.790840100 +0200
+@@ -83,7 +83,7 @@
+ 	  mpz_trace (" b", b);
+ 	  mpz_trace (" want", want);
+ 	  mpz_trace (" got ", got);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -338,7 +338,7 @@
+       fprintf (stderr, "op2=");                 debug_mp (op2, -16);
+       fprintf (stderr, "expected result:\n");   debug_mp (ref, -16);
+       fprintf (stderr, "mpz_gcdext returns:\n");debug_mp (gcd1, -16);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (!gcdext_valid_p(op1, op2, gcd1, s))
+@@ -349,7 +349,7 @@
+       fprintf (stderr, "op2=");                 debug_mp (op2, -16);
+       fprintf (stderr, "mpz_gcdext returns:\n");debug_mp (gcd1, -16);
+       fprintf (stderr, "s=");                   debug_mp (s, -16);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_gcd (gcd2, op1, op2);
+@@ -363,7 +363,7 @@
+       fprintf (stderr, "op2=");                 debug_mp (op2, -16);
+       fprintf (stderr, "expected result:\n");   debug_mp (gcd1, -16);
+       fprintf (stderr, "mpz_gcd returns:\n");   debug_mp (gcd2, -16);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   /* This should probably move to t-gcd_ui.c */
+@@ -381,7 +381,7 @@
+ 	  fprintf (stderr, "op2=");                 debug_mp (op2, -16);
+ 	  fprintf (stderr, "expected result:\n");   debug_mp (gcd1, -16);
+ 	  fprintf (stderr, "mpz_gcd_ui returns:\n");   debug_mp (gcd2, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -403,7 +403,7 @@
+       fprintf (stderr, "op2=");                 debug_mp (op2, -16);
+       fprintf (stderr, "expected result:\n");   debug_mp (gcd1, -16);
+       fprintf (stderr, "mpz_gcdext returns:\n");debug_mp (gcd2, -16);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-gcd_ui.c ./tests/mpz/t-gcd_ui.c
+--- ./tests/mpz/t-gcd_ui.c	2026-06-06 17:45:34.100152200 +0200
++++ ./tests/mpz/t-gcd_ui.c	2026-06-06 17:46:05.802844700 +0200
+@@ -43,7 +43,7 @@
+           printf ("mpz_gcd_ui (ULONG_MAX*2^%d, 0)\n", i);
+           printf ("   return %#lx\n", got);
+           printf ("   should be 0\n");
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+@@ -95,7 +95,7 @@
+   if (mpz_even_p (d) || mpz_cmp (d, f) <= 0 || mpz_cmp_ui (g, 1) != 0)
+     {
+       printf ("No usable factor found.\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   rands = RANDS;
+@@ -116,7 +116,7 @@
+ 	      printf ("mpz_gcd_ui (f, kV+%i*2^%i, V): error (j = %i)\n", i, GMP_NUMB_BITS - 1, j);
+ 	      printf ("   return %#lx\n", got);
+ 	      printf ("   should be %#lx\n", (i != 0 ? 1 : mpz_get_ui (d)));
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  mpz_gcd (g, x, d);
+@@ -124,7 +124,7 @@
+ 	    {
+ 	      printf ("mpz_gcd (f, kV+%i*2^%i, V): error (j = %i)\n", i, GMP_NUMB_BITS - 1, j);
+ 	      printf ("   should%s be one.\n",(i != 0 ? "" : " not"));
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  mpz_sub (x, x, b);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-get_d_2exp.c ./tests/mpz/t-get_d_2exp.c
+--- ./tests/mpz/t-get_d_2exp.c	2026-06-06 17:45:34.123152300 +0200
++++ ./tests/mpz/t-get_d_2exp.c	2026-06-06 17:46:05.826842800 +0200
+@@ -43,7 +43,7 @@
+       d_trace   ("   got  ", got);
+       printf    ("   want exp %ld\n", want_exp);
+       printf    ("   got exp  %ld\n", got_exp);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (z);
+@@ -77,7 +77,7 @@
+           d_trace   ("   got  ", got);
+           printf    ("   want exp %ld\n", want_exp);
+           printf    ("   got exp  %ld\n", got_exp);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+ 
+       mpz_set_si (z, -1L);
+@@ -93,7 +93,7 @@
+           d_trace   ("   got  ", got);
+           printf    ("   want exp %ld\n", want_exp);
+           printf    ("   got exp  %ld\n", got_exp);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+     }
+   mpz_clear (z);
+@@ -133,7 +133,7 @@
+               mpz_trace ("   z    ", z);
+               d_trace   ("   got  ", got);
+               printf    ("   got exp  %ld\n", got_exp);
+-              abort();
++              my_abort(__FILE__,__LINE__);
+             }
+ 
+           mpz_neg (z, z);
+@@ -147,7 +147,7 @@
+               mpz_trace ("   z    ", z);
+               d_trace   ("   got  ", got);
+               printf    ("   got exp  %ld\n", got_exp);
+-              abort();
++              my_abort(__FILE__,__LINE__);
+             }
+         }
+     }
+@@ -184,7 +184,7 @@
+           mpz_trace ("   z    ", z);
+           d_trace   ("   got  ", got);
+           printf    ("   got exp  %ld\n", got_exp);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+ 
+       /* FIXME: If mpz_get_d_2exp rounds upwards we might have got_exp ==
+@@ -198,7 +198,7 @@
+           d_trace   ("   bits ", bits);
+           d_trace   ("   got  ", got);
+           printf    ("   got exp  %ld\n", got_exp);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+ #endif
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-get_d.c ./tests/mpz/t-get_d.c
+--- ./tests/mpz/t-get_d.c	2026-06-06 17:45:34.112149600 +0200
++++ ./tests/mpz/t-get_d.c	2026-06-06 17:46:05.814840400 +0200
+@@ -42,7 +42,7 @@
+   if (got != 0)
+     {
+       printf    ("mpz_get_d wrong on zero\n");
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ 
+   mpz_set_ui (z, 1L);
+@@ -58,7 +58,7 @@
+           mpz_trace ("   z    ", z);
+           printf    ("   want  %.20g\n", want);
+           printf    ("   got   %.20g\n", got);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+ 
+       mpz_mul_2exp (z, z, 1L);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-get_si.c ./tests/mpz/t-get_si.c
+--- ./tests/mpz/t-get_si.c	2026-06-06 17:45:34.136154000 +0200
++++ ./tests/mpz/t-get_si.c	2026-06-06 17:46:05.839352200 +0200
+@@ -57,7 +57,7 @@
+ 	  mpz_out_str (stdout, 16, n); printf (")\n");
+ 	  printf ("   got   %ld (0x%lX)\n", got, got);
+ 	  printf ("   want  %ld (0x%lX)\n", data[i].want, data[i].want);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+   mpz_clear (n);
+@@ -82,7 +82,7 @@
+       mpz_out_str (stdout, 16, n); printf ("\n");       \
+       printf ("   got  %ld, hex %lX\n", got, got);      \
+       printf ("   want %ld, hex %lX\n", want, want);    \
+-      abort();                                          \
++      my_abort(__FILE__,__LINE__);                                          \
+     }
+ 
+   want = LONG_MAX;
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-hamdist.c ./tests/mpz/t-hamdist.c
+--- ./tests/mpz/t-hamdist.c	2026-06-06 17:45:34.149156700 +0200
++++ ./tests/mpz/t-hamdist.c	2026-06-06 17:46:05.850352100 +0200
+@@ -52,7 +52,7 @@
+               printf    ("  want %lu\n", want);
+               mpz_trace ("  x   ", x);
+               mpz_trace ("  y   ", y);
+-              abort();
++              my_abort(__FILE__,__LINE__);
+             }
+ 
+           mpz_neg (x, x);
+@@ -102,7 +102,7 @@
+           printf    ("  want %lu\n", want);
+           mpz_trace ("  x   ", x);
+           mpz_trace ("  y   ", y);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+     }
+   mpz_clear (x);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-import.c ./tests/mpz/t-import.c
+--- ./tests/mpz/t-import.c	2026-06-06 17:45:34.161329700 +0200
++++ ./tests/mpz/t-import.c	2026-06-06 17:46:05.862356900 +0200
+@@ -153,7 +153,7 @@
+                       (unsigned long) align);
+               mpz_trace ("    got ", got);
+               mpz_trace ("    want", want);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-inp_str.c ./tests/mpz/t-inp_str.c
+--- ./tests/mpz/t-inp_str.c	2026-06-06 17:45:34.174332500 +0200
++++ ./tests/mpz/t-inp_str.c	2026-06-06 17:46:05.874872700 +0200
+@@ -126,7 +126,7 @@
+ 		      printf ("  post         %d\n", post);
+ 		      printf ("  got_nread    %d\n", got_nread);
+ 		      printf ("  ftell_nread  %ld\n", ftell_nread);
+-		      abort ();
++		      my_abort (__FILE__,__LINE__);
+ 		    }
+ 		}
+ 
+@@ -143,7 +143,7 @@
+ 		      printf ("  pre   %d\n", pre);
+ 		      printf ("  post  %d\n", post);
+ 		      printf ("  c     '%c' %#x\n", c, c);
+-		      abort ();
++		      my_abort (__FILE__,__LINE__);
+ 		    }
+ 		}
+ 
+@@ -161,7 +161,7 @@
+ 		  printf ("  post        %d\n", post);
+ 		  printf ("  got_nread   %d\n", got_nread);
+ 		  printf ("  want_nread  %d\n", want_nread);
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      MPZ_CHECK_FORMAT (got);
+@@ -173,7 +173,7 @@
+ 		  printf ("  base  %d\n", data[i].base);
+ 		  mpz_trace ("  got ",  got);
+ 		  mpz_trace ("  want", want);
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      ASSERT_ALWAYS (fclose (fp) == 0);
+@@ -188,6 +188,9 @@
+ int
+ main (void)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++	return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   tests_start ();
+ 
+   check_data ();
+@@ -195,4 +198,5 @@
+   unlink (FILENAME);
+   tests_end ();
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-invert.c ./tests/mpz/t-invert.c
+--- ./tests/mpz/t-invert.c	2026-06-06 17:45:34.186330800 +0200
++++ ./tests/mpz/t-invert.c	2026-06-06 17:46:05.887866000 +0200
+@@ -77,7 +77,7 @@
+ 	      gmp_fprintf (stderr, "a = %Zx\n", a);
+ 	      gmp_fprintf (stderr, "1/a = %Zx\n", ainv);
+ 	      gmp_fprintf (stderr, "m = %Zx\n", m);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  mpz_mul (t, ainv, a);
+@@ -89,7 +89,7 @@
+ 	      gmp_fprintf (stderr, "a^(-1)*a != 1 (mod m)\n");
+ 	      gmp_fprintf (stderr, "a = %Zx\n", a);
+ 	      gmp_fprintf (stderr, "m = %Zx\n", m);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+       else /* Inverse deos not exist */
+@@ -101,7 +101,7 @@
+ 	      gmp_fprintf (stderr, "Inverse exists, but was not found.\n");
+ 	      gmp_fprintf (stderr, "a = %Zx\n", a);
+ 	      gmp_fprintf (stderr, "m = %Zx\n", m);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-io_raw.c ./tests/mpz/t-io_raw.c
+--- ./tests/mpz/t-io_raw.c	2026-06-06 17:45:34.198331900 +0200
++++ ./tests/mpz/t-io_raw.c	2026-06-06 17:46:05.899868500 +0200
+@@ -48,7 +48,7 @@
+   if (fp == NULL)
+     {
+       printf ("Cannot create file %s\n", filename);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   return fp;
+ }
+@@ -120,7 +120,7 @@
+ 		  printf    ("  want_ret %lu\n", (unsigned long) want_ret);
+ 		  mpz_trace ("  got      ", got);
+ 		  mpz_trace ("  want     ", want);
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 
+ 	      mpz_neg (want, want);
+@@ -205,7 +205,7 @@
+ 	      for (j = 0; j < want_len; j++)
+ 		printf (" %02X", (unsigned) (unsigned char) got[j]);
+ 	      printf    ("\n");
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 
+ 	  mpz_neg (z, z);
+@@ -260,7 +260,7 @@
+ 	  printf    ("  inp_ret %lu\n", (unsigned long) inp_ret);
+ 	  mpz_trace ("  want", want);
+ 	  mpz_trace ("  got ", got);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -272,6 +272,9 @@
+ int
+ main (void)
+ {
++#if defined(_STATIC_RT) && defined(__GMP_LIBGMP_DLL) && (1 == __GMP_LIBGMP_DLL)
++	return 99; // does NOT work because FILE* from this exe are unknown in DLL code (static runtime)
++#else
+   tests_start ();
+   mp_trace_base = -16;
+ 
+@@ -283,4 +286,5 @@
+   tests_end ();
+ 
+   exit (0);
++#endif
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-jac.c ./tests/mpz/t-jac.c
+--- ./tests/mpz/t-jac.c	2026-06-06 17:45:34.212330300 +0200
++++ ./tests/mpz/t-jac.c	2026-06-06 17:46:05.912868100 +0200
+@@ -90,7 +90,7 @@
+       printf (LL("mpn_jacobi_base (%lu, %lu) is %d should be %d\n",
+ 		 "mpn_jacobi_base (%llu, %llu) is %d should be %d\n"),
+ 	      a, b, got, answer);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -106,7 +106,7 @@
+       printf ("mpz_kronecker_ui (");
+       mpz_out_str (stdout, 10, a);
+       printf (", %lu) is %d should be %d\n", b, got, answer);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -122,7 +122,7 @@
+       printf ("mpz_kronecker_si (");
+       mpz_out_str (stdout, 10, a);
+       printf (", %ld) is %d should be %d\n", b, got, answer);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -138,7 +138,7 @@
+       printf ("mpz_ui_kronecker (%lu, ", a);
+       mpz_out_str (stdout, 10, b);
+       printf (") is %d should be %d\n", got, answer);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -154,7 +154,7 @@
+       printf ("mpz_si_kronecker (%ld, ", a);
+       mpz_out_str (stdout, 10, b);
+       printf (") is %d should be %d\n", got, answer);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -175,7 +175,7 @@
+       printf (", ");
+       mpz_out_str (stdout, 10, b);
+       printf (") is %d should be %d\n", got, answer);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-lcm.c ./tests/mpz/t-lcm.c
+--- ./tests/mpz/t-lcm.c	2026-06-06 17:45:34.223328300 +0200
++++ ./tests/mpz/t-lcm.c	2026-06-06 17:46:05.923866500 +0200
+@@ -64,7 +64,7 @@
+ 		      mpz_trace ("y", y);
+ 		      mpz_trace ("got", got);
+ 		      mpz_trace ("want", want);
+-		      abort ();
++		      my_abort (__FILE__,__LINE__);
+ 		    }
+ 
+ 		  if (mpz_fits_ulong_p (y))
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-limbs.c ./tests/mpz/t-limbs.c
+--- ./tests/mpz/t-limbs.c	2026-06-06 17:45:34.234329600 +0200
++++ ./tests/mpz/t-limbs.c	2026-06-06 17:46:05.936866300 +0200
+@@ -70,7 +70,7 @@
+       gmp_printf ("b = %Zx\n", b);
+       gmp_printf ("r = %Zx (bad)\n", r);
+       gmp_printf ("ref = %Zx\n", ref);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   mpz_clears (r, ref, NULL);
+ }
+@@ -198,7 +198,7 @@
+ 	    gmp_printf ("b = %Zx\n", b);
+ 	    gmp_printf ("r = %Zx (bad)\n", r);
+ 	    gmp_printf ("ref = %Zx\n", ref);
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 	  }
+ #endif
+ 	mpz_set_ui (r, 0);
+@@ -210,7 +210,7 @@
+ 	    gmp_printf ("b = %Zx\n", b);
+ 	    gmp_printf ("r = %Zx (bad)\n", r);
+ 	    gmp_printf ("ref = %Zx\n", ref);
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 	  }
+       }
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-lucm.c ./tests/mpz/t-lucm.c
+--- ./tests/mpz/t-lucm.c	2026-06-06 17:45:34.246332200 +0200
++++ ./tests/mpz/t-lucm.c	2026-06-06 17:46:05.948866400 +0200
+@@ -120,7 +120,7 @@
+ 	  debug_mp (r1, -16);
+ 	  fprintf (stderr, "mpz_lucas_mod result (%d) Q=%ld:\n", res, Q);
+ 	  debug_mp (r2, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-lucnum_ui.c ./tests/mpz/t-lucnum_ui.c
+--- ./tests/mpz/t-lucnum_ui.c	2026-06-06 17:45:34.257332100 +0200
++++ ./tests/mpz/t-lucnum_ui.c	2026-06-06 17:46:05.959872900 +0200
+@@ -60,7 +60,7 @@
+           mpz_trace ("got  ln ",  got_ln);
+           mpz_trace ("want ln1", want_ln1);
+           mpz_trace ("got  ln1",  got_ln1);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       mpz_lucnum_ui (got_ln, n);
+@@ -70,7 +70,7 @@
+           printf ("mpz_lucnum_ui(%lu) wrong\n", n);
+           mpz_trace ("want ln", want_ln);
+           mpz_trace ("got  ln", got_ln);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       mpz_add (want_ln1, want_ln1, want_ln);  /* L[n+1] = L[n] + L[n-1] */
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-mfac_uiui.c ./tests/mpz/t-mfac_uiui.c
+--- ./tests/mpz/t-mfac_uiui.c	2026-06-06 17:45:34.269550200 +0200
++++ ./tests/mpz/t-mfac_uiui.c	2026-06-06 17:46:05.972951000 +0200
+@@ -68,7 +68,7 @@
+           printf ("mpz_mfac_uiui(%lu,%d) wrong\n", n, MULTIFAC_WHEEL);
+           printf ("  got  "); mpz_out_str (stdout, 10, res); printf("\n");
+           printf ("  want "); mpz_out_str (stdout, 10, ref[m]); printf("\n");
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+       mpz_mfac_uiui (res, n, MULTIFAC_WHEEL2);
+       MPZ_CHECK_FORMAT (res);
+@@ -77,7 +77,7 @@
+           printf ("mpz_mfac_uiui(%lu,%d) wrong\n", n, MULTIFAC_WHEEL2);
+           printf ("  got  "); mpz_out_str (stdout, 10, res); printf("\n");
+           printf ("  want "); mpz_out_str (stdout, 10, ref2[m2]); printf("\n");
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+       if (n + step <= limit)
+ 	for (j = 0; j < step; j++) {
+@@ -97,7 +97,7 @@
+       printf ("mpz_mfac_uiui(%lu,1) wrong\n", n);
+       printf ("  got  "); mpz_out_str (stdout, 10, res); printf("\n");
+       printf ("  want "); mpz_out_str (stdout, 10, ref[0]); printf("\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_2fac_ui (ref[0], n);
+@@ -108,7 +108,7 @@
+       printf ("mpz_mfac_uiui(%lu,1) wrong\n", n);
+       printf ("  got  "); mpz_out_str (stdout, 10, res); printf("\n");
+       printf ("  want "); mpz_out_str (stdout, 10, ref[0]); printf("\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   n++;
+@@ -120,7 +120,7 @@
+       printf ("mpz_mfac_uiui(%lu,2) wrong\n", n);
+       printf ("  got  "); mpz_out_str (stdout, 10, res); printf("\n");
+       printf ("  want "); mpz_out_str (stdout, 10, ref[0]); printf("\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   for (m = 0; m < MULTIFAC_WHEEL; m++)
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-mul.c ./tests/mpz/t-mul.c
+--- ./tests/mpz/t-mul.c	2026-06-06 17:45:34.281563400 +0200
++++ ./tests/mpz/t-mul.c	2026-06-06 17:46:05.983947500 +0200
+@@ -195,8 +195,12 @@
+   for (e = ABSIZ(ref_product) - 1; e >= 0; e--)
+     if (PTR(ref_product)[e] != PTR(product)[e])
+       break;
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++  printf("ERRORS in %lld--%lld\n", b, e);
++#else
+   printf ("ERRORS in %ld--%ld\n", b, e);
+-  abort();
++#endif
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-mul_i.c ./tests/mpz/t-mul_i.c
+--- ./tests/mpz/t-mul_i.c	2026-06-06 17:45:34.293547400 +0200
++++ ./tests/mpz/t-mul_i.c	2026-06-06 17:46:05.995947600 +0200
+@@ -36,7 +36,7 @@
+       printf    ("  y=%ld (0x%lX)\n", y, y);
+       mpz_trace ("  got ", got);
+       mpz_trace ("  want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -50,7 +50,7 @@
+       printf    ("  y=%lu (0x%lX)\n", y, y);
+       mpz_trace ("  got ", got);
+       mpz_trace ("  want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-nextprime.c ./tests/mpz/t-nextprime.c
+--- ./tests/mpz/t-nextprime.c	2026-06-06 17:45:34.304551800 +0200
++++ ./tests/mpz/t-nextprime.c	2026-06-06 17:46:06.007950100 +0200
+@@ -56,14 +56,14 @@
+   if (mpz_cmp_ui(t, gap) != 0)
+      {
+       gmp_printf ("nextprime gap %Zd => %Zd != %d\n", low, nxt, gap);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_prevprime(t, nxt);
+   if (mpz_cmp(t, low) != 0)
+     {
+       gmp_printf ("prevprime gap %Zd => %Zd != %d\n", nxt, t, gap);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (t);
+@@ -159,7 +159,7 @@
+ 	  (! mpz_fits_sshort_p (x) || diffs[i] != (short) mpz_get_ui (x)))
+ 	{
+ 	  gmp_printf ("diff list discrepancy\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+       mpz_swap (x, y);
+     }
+@@ -170,7 +170,7 @@
+     {
+       gmp_printf ("got  %Zd\n", x);
+       gmp_printf ("want %Zd\n", y);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (y);
+@@ -196,7 +196,7 @@
+ 	{
+ 	  gmp_printf ("diff list discrepancy %Zd, %d vs %d\n",
+                 y, diffs[i], mpz_get_ui (x));
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+       mpz_swap (x, y);
+     }
+@@ -209,7 +209,7 @@
+     {
+       gmp_printf ("got  %Zd\n", x);
+       gmp_printf ("want %Zd\n", y);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (y);
+@@ -252,7 +252,7 @@
+           gmp_printf ("start %Zd\n", x);
+           gmp_printf ("got   %Zd\n", test_p);
+           gmp_printf ("want  %Zd\n", ref_p);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+@@ -308,7 +308,7 @@
+         if ( retval != 0 || mpz_cmp_ui (prvp, temp) != 0 )
+           {
+             gmp_printf ("mpz_prevprime(%Zd) return (%d) rop (%Zd)\n", n, retval, prvp);
+-            abort ();
++            my_abort (__FILE__,__LINE__);
+           }
+       }
+   }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-oddeven.c ./tests/mpz/t-oddeven.c
+--- ./tests/mpz/t-oddeven.c	2026-06-06 17:45:34.314550000 +0200
++++ ./tests/mpz/t-oddeven.c	2026-06-06 17:46:06.020954800 +0200
+@@ -62,13 +62,13 @@
+       if ((mpz_odd_p (n) != 0) != data[i].odd)
+ 	{
+ 	  printf ("mpz_odd_p wrong on data[%d]\n", i);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+ 
+       if ((mpz_even_p (n) != 0) != data[i].even)
+ 	{
+ 	  printf ("mpz_even_p wrong on data[%d]\n", i);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-perfpow.c ./tests/mpz/t-perfpow.c
+--- ./tests/mpz/t-perfpow.c	2026-06-06 17:45:34.325549600 +0200
++++ ./tests/mpz/t-perfpow.c	2026-06-06 17:46:06.033949500 +0200
+@@ -94,7 +94,7 @@
+ 	{
+ 	  fprintf (stderr, "mpz_perfect_power_p returns %d when %d was expected\n", got, want);
+ 	  fprintf (stderr, "fault operand: %s\n", tests[i].num_as_str);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+@@ -196,13 +196,13 @@
+ 	  {
+ 	    printf("n is a perfect power, perfpow_p disagrees\n");
+ 	    gmp_printf("n = %Zu\nprimes[0] = %Zu\nexp[0] = %lu\n", n, primes[0], exp[0]);
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 	  }
+ 	else if (res == 1 && exp[0] == 1)
+ 	  {
+ 	    gmp_printf("n = %Zu\n", n);
+ 	    printf("n is now a prime number, but perfpow_p still believes n is a perfect power\n");
+-	    abort ();
++	    my_abort (__FILE__,__LINE__);
+ 	  }
+ 	}
+       else
+@@ -210,12 +210,12 @@
+ 	  if (res == 1 && destroy != 0)
+ 	    {
+ 	      gmp_printf("n = %Zu\nn was destroyed, but perfpow_p still believes n is a perfect power\n", n);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	  else if (res == 0 && destroy == 0)
+ 	    {
+ 	      gmp_printf("n = %Zu\nn is a perfect power, perfpow_p disagrees\n", n);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	}
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-perfsqr.c ./tests/mpz/t-perfsqr.c
+--- ./tests/mpz/t-perfsqr.c	2026-06-06 17:45:34.337549900 +0200
++++ ./tests/mpz/t-perfsqr.c	2026-06-06 17:46:06.045949900 +0200
+@@ -73,7 +73,7 @@
+             {
+               printf ("mpz_perfect_square_p got 0, want 1\n");
+               mpz_trace ("  n", n);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+@@ -121,7 +121,7 @@
+           mpz_trace ("   x2t", x2t);
+           printf    ("   mpz_perfect_square_p %d\n", res);
+           printf    ("   mpz_sqrt             %d\n", mpz_cmp (x2, x2t) == 0);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       /* cnt += res != 0; */
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-popcount.c ./tests/mpz/t-popcount.c
+--- ./tests/mpz/t-popcount.c	2026-06-06 17:45:34.350552200 +0200
++++ ./tests/mpz/t-popcount.c	2026-06-06 17:46:06.058951800 +0200
+@@ -39,7 +39,7 @@
+ 	{
+ 	  printf ("mpz_popcount wrong on single bit at %lu\n", i);
+ 	  printf ("   got %lu, want 1\n", got);
+-	  abort();
++	  my_abort(__FILE__,__LINE__);
+ 	}
+       mpz_clrbit (n, i);
+     }
+@@ -83,7 +83,7 @@
+ 	  printf ("         0x"); mpz_out_str (stdout, 16, n); printf ("\n");
+ 	  printf ("   got   %lu\n", got);
+ 	  printf ("   want  %lu\n", data[i].want);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+   mpz_clear (n);
+@@ -146,7 +146,7 @@
+ 	  printf ("         0x"); mpz_out_str (stdout, 16, arg); printf ("\n");
+ 	  printf ("   got   %lu\n", got);
+ 	  printf ("   want  %lu\n", ref);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+   mpz_clear (arg);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-pow.c ./tests/mpz/t-pow.c
+--- ./tests/mpz/t-pow.c	2026-06-06 17:45:34.363061800 +0200
++++ ./tests/mpz/t-pow.c	2026-06-06 17:46:06.069957100 +0200
+@@ -41,7 +41,7 @@
+       printf    ("  exp = %lu (0x%lX)\n", exp, exp);
+       mpz_trace ("  got ", got);
+       mpz_trace ("  want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_set (got, base);
+@@ -53,7 +53,7 @@
+       printf    ("  exp = %lu (0x%lX)\n", exp, exp);
+       mpz_trace ("  got ", got);
+       mpz_trace ("  want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (mpz_fits_ulong_p (base))
+@@ -67,7 +67,7 @@
+ 	  printf    ("  exp = %lu (0x%lX)\n", exp, exp);
+ 	  mpz_trace ("  got ", got);
+ 	  mpz_trace ("  want", want);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-powm.c ./tests/mpz/t-powm.c
+--- ./tests/mpz/t-powm.c	2026-06-06 17:45:34.375064600 +0200
++++ ./tests/mpz/t-powm.c	2026-06-06 17:46:06.083155500 +0200
+@@ -73,7 +73,7 @@
+ 	      fprintf (stderr, "mpz_powm result:\n");
+ 	      debug_mp (r1, -16);
+ 	      fprintf (stderr, "Should be 2 ^ 0x%lx = 0x%lx (mod 0x%lx)\n", e, r, m);
+-	      abort ();
++	      my_abort (__FILE__,__LINE__);
+ 	    }
+ 	  if (r > (m >> 1))
+ 	    r = (r << 1) - m;
+@@ -219,7 +219,7 @@
+ 	  debug_mp (r1, -16);
+ 	  fprintf (stderr, "reference result:\n");
+ 	  debug_mp (r2, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (mpz_tdiv_ui (mod, 2) == 0)
+@@ -238,7 +238,7 @@
+ 	  debug_mp (r1, -16);
+ 	  fprintf (stderr, "reference result:\n");
+ 	  debug_mp (r2, -16);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-powm_ui.c ./tests/mpz/t-powm_ui.c
+--- ./tests/mpz/t-powm_ui.c	2026-06-06 17:45:34.386062800 +0200
++++ ./tests/mpz/t-powm_ui.c	2026-06-06 17:46:06.095158500 +0200
+@@ -116,7 +116,7 @@
+ 	  gmp_fprintf (stderr, "M = 0x%Zx\n", mod);
+ 	  gmp_fprintf (stderr, "R   = 0x%Zx\n", r1);
+ 	  gmp_fprintf (stderr, "REF = 0x%Zx\n", r2);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-pprime_p.c ./tests/mpz/t-pprime_p.c
+--- ./tests/mpz/t-pprime_p.c	2026-06-06 17:45:34.398064800 +0200
++++ ./tests/mpz/t-pprime_p.c	2026-06-06 17:46:06.108156400 +0200
+@@ -61,7 +61,7 @@
+       mpz_trace ("  n    ", n);
+       printf    ("  got =%d", got);
+       printf    ("  want=%d", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-primorial_ui.c ./tests/mpz/t-primorial_ui.c
+--- ./tests/mpz/t-primorial_ui.c	2026-06-06 17:45:34.410064300 +0200
++++ ./tests/mpz/t-primorial_ui.c	2026-06-06 17:46:06.120156300 +0200
+@@ -65,7 +65,7 @@
+ 	  printf ("mpz_primorial_ui(%lu) wrong\n", n);
+ 	  printf ("  got  "); mpz_out_str (stdout, 10, r); printf("\n");
+ 	  printf ("  want "); mpz_out_str (stdout, 10, f); printf("\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+ 
+       if (isprime (++n))
+@@ -98,7 +98,7 @@
+ 	  printf ("mpz_primorial_ui(%lu) wrong\n", i);
+ 	  printf ("  got  "); mpz_out_str (stdout, 10, r); printf("\n");
+ 	  printf ("  want "); mpz_out_str (stdout, 10, f); printf("\n");
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     } while (++n < limit);
+   /* Chech a single "big" value, modulo a larger prime */
+@@ -114,7 +114,7 @@
+       printf ("mpz_primorial_ui(%lu) wrong\n", n);
+       printf ("  got  "); mpz_out_str (stdout, 10, r); printf("\n");
+       printf ("  want "); mpz_out_str (stdout, 10, f); printf("\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (bs);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-remove.c ./tests/mpz/t-remove.c
+--- ./tests/mpz/t-remove.c	2026-06-06 17:45:34.421062000 +0200
++++ ./tests/mpz/t-remove.c	2026-06-06 17:46:06.132155500 +0200
+@@ -84,7 +84,7 @@
+ 	  fprintf (stderr, "    op2 = "); debug_mp (divisor);
+ 	  fprintf (stderr, "refdest = "); debug_mp (refdest);
+ 	  fprintf (stderr, "   dest = "); debug_mp (dest);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-root.c ./tests/mpz/t-root.c
+--- ./tests/mpz/t-root.c	2026-06-06 17:45:34.434062600 +0200
++++ ./tests/mpz/t-root.c	2026-06-06 17:46:06.145154800 +0200
+@@ -56,7 +56,7 @@
+       debug_mp (root1, 10);
+       debug_mp (root2, 10);
+       fprintf (stderr, "nth: %lu ,res: %i\n", nth, res);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (nth > 1 && mpz_cmp_ui (temp, 1L) > 0 && ! mpz_perfect_power_p (temp))
+@@ -65,7 +65,7 @@
+       debug_mp (temp, 10);
+       debug_mp (root1, 10);
+       fprintf (stderr, "nth: %lu\n", nth);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   if (nth <= 10000 && mpz_sgn(x2) > 0)		/* skip too expensive test */
+@@ -81,7 +81,7 @@
+ 	  debug_mp (x2, 10);
+ 	  debug_mp (root1, 10);
+ 	  fprintf (stderr, "nth: %lu\n", nth);
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+ 	}
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-scan.c ./tests/mpz/t-scan.c
+--- ./tests/mpz/t-scan.c	2026-06-06 17:45:34.447067700 +0200
++++ ./tests/mpz/t-scan.c	2026-06-06 17:46:06.158163000 +0200
+@@ -101,8 +101,13 @@
+ 
+                           if (got != want)
+                             {
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++                            printf("wrong at test=%d, size=%lld, neg=%d, start=%lu, sought=%d\n",
++                              test, size, neg, start, sought);
++#else
+                               printf ("wrong at test=%d, size=%ld, neg=%d, start=%lu, sought=%d\n",
+                                       test, size, neg, start, sought);
++#endif
+                               printf ("   z 0x");
+                               mpz_out_str (stdout, -16, z);
+                               printf ("\n");
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-set_d.c ./tests/mpz/t-set_d.c
+--- ./tests/mpz/t-set_d.c	2026-06-06 17:45:34.461580500 +0200
++++ ./tests/mpz/t-set_d.c	2026-06-06 17:46:06.169163000 +0200
+@@ -68,7 +68,7 @@
+           printf    ("  want size %ld\n", (long) data[i].want_size);
+           mpn_trace ("  got  z", z->_mp_d, z->_mp_size);
+           mpn_trace ("  want z", data[i].want_data, data[i].want_size);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpz_clear (z);
+ 
+@@ -118,7 +118,7 @@
+           d_trace   ("  d ", d);
+           mpz_trace ("  got  ", got);
+           mpz_trace ("  want ", want);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-set_f.c ./tests/mpz/t-set_f.c
+--- ./tests/mpz/t-set_f.c	2026-06-06 17:45:34.474580600 +0200
++++ ./tests/mpz/t-set_f.c	2026-06-06 17:46:06.181259000 +0200
+@@ -75,7 +75,7 @@
+ 		  mpf_trace ("     f", f);
+ 		  mpz_trace ("   got", got);
+ 		  mpz_trace ("  want", want);
+-		  abort ();
++		  my_abort (__FILE__,__LINE__);
+ 		}
+ 	    }
+ 	}
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-set_si.c ./tests/mpz/t-set_si.c
+--- ./tests/mpz/t-set_si.c	2026-06-06 17:45:34.486580700 +0200
++++ ./tests/mpz/t-set_si.c	2026-06-06 17:46:06.195257500 +0200
+@@ -66,7 +66,7 @@
+                                    ABS (data[i].want_size)) != 0)
+         {
+           printf ("mpz_set_si wrong on data[%d]\n", i);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpz_clear (n);
+ 
+@@ -77,7 +77,7 @@
+                                    ABS (data[i].want_size)) != 0)
+         {
+           printf ("mpz_init_set_si wrong on data[%d]\n", i);
+-          abort();
++          my_abort(__FILE__,__LINE__);
+         }
+       mpz_clear (n);
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-set_str.c ./tests/mpz/t-set_str.c
+--- ./tests/mpz/t-set_str.c	2026-06-06 17:45:34.498581300 +0200
++++ ./tests/mpz/t-set_str.c	2026-06-06 17:46:06.208258300 +0200
+@@ -38,7 +38,7 @@
+       printf ("mpz_set_str unexpectedly failed\n");
+       printf ("  base %d\n", base);
+       printf ("  str  \"%s\"\n", str);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   MPZ_CHECK_FORMAT (got);
+ 
+@@ -49,7 +49,7 @@
+       printf ("  str  \"%s\"\n", str);
+       mpz_trace ("got ", got);
+       mpz_trace ("want", want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   mpz_clear (got);
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-sizeinbase.c ./tests/mpz/t-sizeinbase.c
+--- ./tests/mpz/t-sizeinbase.c	2026-06-06 17:45:34.511580500 +0200
++++ ./tests/mpz/t-sizeinbase.c	2026-06-06 17:46:06.220258400 +0200
+@@ -72,7 +72,7 @@
+       printf ("  totbits %lu\n", totbits);
+       printf ("  got     %u\n",  got);
+       printf ("  want    %u\n",  want);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ #endif
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-sqrtrem.c ./tests/mpz/t-sqrtrem.c
+--- ./tests/mpz/t-sqrtrem.c	2026-06-06 17:45:34.524583000 +0200
++++ ./tests/mpz/t-sqrtrem.c	2026-06-06 17:46:06.233258400 +0200
+@@ -112,7 +112,7 @@
+   fprintf (stderr, "x2        = "); debug_mp (x2, -16);
+   fprintf (stderr, "x         = "); debug_mp (x, -16);
+   fprintf (stderr, "remainder = "); debug_mp (rem, -16);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-tdiv.c ./tests/mpz/t-tdiv.c
+--- ./tests/mpz/t-tdiv.c	2026-06-06 17:45:34.536578700 +0200
++++ ./tests/mpz/t-tdiv.c	2026-06-06 17:46:06.246260300 +0200
+@@ -135,7 +135,7 @@
+   fprintf (stderr, "ERROR\n");
+   fprintf (stderr, "dividend = "); debug_mp (dividend, -16);
+   fprintf (stderr, "divisor  = "); debug_mp (divisor, -16);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/mpz/t-tdiv_ui.c ./tests/mpz/t-tdiv_ui.c
+--- ./tests/mpz/t-tdiv_ui.c	2026-06-06 17:45:34.549586500 +0200
++++ ./tests/mpz/t-tdiv_ui.c	2026-06-06 17:46:06.259264200 +0200
+@@ -148,7 +148,7 @@
+   fprintf (stderr, "ERROR: %s\n", str);
+   fprintf (stderr, "dividend = "); debug_mp (dividend, -16);
+   fprintf (stderr, "divisor  = %lX\n", divisor);
+-  abort();
++  my_abort(__FILE__,__LINE__);
+ }
+ 
+ void
+diff -NaurbEZwB -x 'Makefile*' ./tests/rand/t-iset.c ./tests/rand/t-iset.c
+--- ./tests/rand/t-iset.c	2026-06-06 17:45:34.658868400 +0200
++++ ./tests/rand/t-iset.c	2026-06-06 17:46:06.281717200 +0200
+@@ -46,7 +46,7 @@
+           printf     ("  algorithm: %s\n", name);
+           gmp_printf ("  from src:  %#Zx\n", sz);
+           gmp_printf ("  from dst:  %#Zx\n", dz);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/rand/t-lc2exp.c ./tests/rand/t-lc2exp.c
+--- ./tests/rand/t-lc2exp.c	2026-06-06 17:45:34.670367000 +0200
++++ ./tests/rand/t-lc2exp.c	2026-06-06 17:46:06.294717300 +0200
+@@ -45,7 +45,7 @@
+         {
+           printf ("check_zero m2exp=%lu: didn't get zero\n", m2exp);
+           gmp_printf ("  rand=%#Zx\n", a);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+@@ -107,7 +107,7 @@
+           printf     ("   m2exp=%lu\n", m2exp);
+           gmp_printf ("   rand=%#ZX\n", a);
+           gmp_printf ("   sizeinbase2=%u\n", mpz_sizeinbase (a, 2));
+-	  abort ();
++	  my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+@@ -138,7 +138,7 @@
+           printf     ("check_bigc1: mpz_urandomb didn't give 1\n");
+           printf     ("   m2exp=%lu\n", m2exp);
+           gmp_printf ("   got rand=%#ZX\n", a);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/rand/t-urbui.c ./tests/rand/t-urbui.c
+--- ./tests/rand/t-urbui.c	2026-06-06 17:45:34.706368300 +0200
++++ ./tests/rand/t-urbui.c	2026-06-06 17:46:06.325716500 +0200
+@@ -46,7 +46,7 @@
+               printf ("  bits:  %lu\n", bits);
+               printf ("  limit: %#lx\n", limit);
+               printf ("  got:   %#lx\n", got);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/rand/t-urmui.c ./tests/rand/t-urmui.c
+--- ./tests/rand/t-urmui.c	2026-06-06 17:45:34.719365300 +0200
++++ ./tests/rand/t-urmui.c	2026-06-06 17:46:06.336729700 +0200
+@@ -55,7 +55,7 @@
+               printf ("  algorithm: %s\n", name);
+               printf ("  n:     %#lx\n", n);
+               printf ("  got:   %#lx\n", got);
+-              abort ();
++              my_abort (__FILE__,__LINE__);
+             }
+         }
+     }
+diff -NaurbEZwB -x 'Makefile*' ./tests/refmpf.c ./tests/refmpf.c
+--- ./tests/refmpf.c	2026-06-06 17:45:34.759875400 +0200
++++ ./tests/refmpf.c	2026-06-06 17:46:06.355726000 +0200
+@@ -121,7 +121,7 @@
+   if (fsize == 0)
+     {
+       printf ("Oops, refmpf_add_ulp called with f==0\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ 
+   c = refmpn_add_1 (fp, fp, abs_fsize, CNST_LIMB(1));
+@@ -130,7 +130,7 @@
+       if (abs_fsize >= PREC(f) + 1)
+         {
+           printf ("Oops, refmpf_add_ulp carried out of prec+1 limbs\n");
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       fp[abs_fsize] = c;
+diff -NaurbEZwB -x 'Makefile*' ./tests/spinner.c ./tests/spinner.c
+--- ./tests/spinner.c	2026-06-06 17:45:34.806879500 +0200
++++ ./tests/spinner.c	2026-06-06 17:46:06.409239200 +0200
+@@ -35,7 +35,7 @@
+ /* "alarm" is not available on mingw32, and the SIGALRM constant is not
+    defined.  Don't bother with a spinner in this case.  */
+ #if ! HAVE_ALARM || ! defined (SIGALRM)
+-#define alarm(n)          abort()
++#define alarm(n)          my_abort(__FILE__,__LINE__)
+ #define signal(sig,func)  SIG_ERR
+ #endif
+ 
+@@ -59,7 +59,7 @@
+   if (signal (SIGALRM, spinner_signal) == SIG_ERR)
+     {
+       printf ("spinner_signal(): Oops, cannot reinstall SIGALRM\n");
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+   alarm (1);
+ }
+@@ -80,7 +80,7 @@
+ {
+   spinner_wanted = isatty (STDOUT_FILENO);
+   if (spinner_wanted == -1)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   if (!spinner_wanted)
+     return;
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-bswap.c ./tests/t-bswap.c
+--- ./tests/t-bswap.c	2026-06-06 17:45:34.817884400 +0200
++++ ./tests/t-bswap.c	2026-06-06 17:46:06.422237500 +0200
+@@ -30,6 +30,9 @@
+   mp_limb_t  src, want, got;
+   int        i;
+ 
++  fprintf(stderr, "GMP errno = %i\n", gmp_errno);
++  fprintf(stderr, "bits per limb = %i\n", mp_bits_per_limb);
++
+   tests_start ();
+   mp_trace_base = -16;
+ 
+@@ -47,7 +50,7 @@
+           mpn_trace ("  src ", &src,  (mp_size_t) 1);
+           mpn_trace ("  want", &want, (mp_size_t) 1);
+           mpn_trace ("  got ", &got,  (mp_size_t) 1);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+ 
+       BSWAP_LIMB_FETCH (got, &src);
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-constants.c ./tests/t-constants.c
+--- ./tests/t-constants.c	2026-06-06 17:45:34.830395200 +0200
++++ ./tests/t-constants.c	2026-06-06 17:46:06.434243100 +0200
+@@ -337,7 +337,7 @@
+     }
+ 
+   if (error)
+-    abort ();
++    my_abort (__FILE__,__LINE__);
+ 
+   exit (0);
+ }
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-count_zeros.c ./tests/t-count_zeros.c
+--- ./tests/t-count_zeros.c	2026-06-06 17:45:34.841393000 +0200
++++ ./tests/t-count_zeros.c	2026-06-06 17:46:06.446239000 +0200
+@@ -34,7 +34,7 @@
+       mp_limb_trace ("  n    ", n);
+       printf        ("  want %d\n", want);
+       printf        ("  got  %d\n", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -49,7 +49,7 @@
+       mpn_trace ("  n    ", &n, (mp_size_t) 1);
+       printf    ("  want %d\n", want);
+       printf    ("  got  %d\n", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-modlinv.c ./tests/t-modlinv.c
+--- ./tests/t-modlinv.c	2026-06-06 17:45:34.863908900 +0200
++++ ./tests/t-modlinv.c	2026-06-06 17:46:06.465243900 +0200
+@@ -38,7 +38,7 @@
+       mp_limb_trace ("  n       ", n);
+       mp_limb_trace ("  got     ", inv);
+       mp_limb_trace ("  product ", prod);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-parity.c ./tests/t-parity.c
+--- ./tests/t-parity.c	2026-06-06 17:45:34.875905800 +0200
++++ ./tests/t-parity.c	2026-06-06 17:46:06.478298200 +0200
+@@ -33,7 +33,7 @@
+       printf ("  n    %lX\n", n);
+       printf ("  want %d\n", want);
+       printf ("  got  %d\n", got);
+-      abort ();
++      my_abort (__FILE__,__LINE__);
+     }
+ }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-popc.c ./tests/t-popc.c
+--- ./tests/t-popc.c	2026-06-06 17:45:34.888909000 +0200
++++ ./tests/t-popc.c	2026-06-06 17:46:06.491296800 +0200
+@@ -46,7 +46,7 @@
+           mpn_trace ("  src ", &src,  (mp_size_t) 1);
+           mpn_trace ("  want", &want, (mp_size_t) 1);
+           mpn_trace ("  got ", &got,  (mp_size_t) 1);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tests/trace.c ./tests/trace.c
+--- ./tests/trace.c	2026-06-06 17:45:34.926905500 +0200
++++ ./tests/trace.c	2026-06-06 17:46:06.529298300 +0200
+@@ -207,7 +207,7 @@
+   if (fp == NULL)
+     {
+       perror ("fopen");
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ 
+   MPN_NORMALIZE (ptr, size);
+@@ -220,7 +220,7 @@
+   if (ferror (fp) || fclose (fp) != 0)
+     {
+       printf ("error writing %s\n", filename);
+-      abort();
++      my_abort(__FILE__,__LINE__);
+     }
+ }
+ 
+@@ -273,7 +273,7 @@
+   case  10: fmt = " %d"; break;
+   case  16: fmt = " %x"; break;
+   case -16: fmt = " %X"; break;
+-  default: printf ("Oops, unsupported base in byte_trace\n"); abort (); break;
++  default: printf ("Oops, unsupported base in byte_trace\n"); my_abort (__FILE__,__LINE__); break;
+   }
+ 
+   for (i = 0; i < size; i++)
+diff -NaurbEZwB -x 'Makefile*' ./tests/t-sub.c ./tests/t-sub.c
+--- ./tests/t-sub.c	2026-06-06 17:45:34.899905400 +0200
++++ ./tests/t-sub.c	2026-06-06 17:46:06.503297800 +0200
+@@ -62,7 +62,7 @@
+           mp_limb_trace ("  want dl", data[i].want_dl);
+           mp_limb_trace ("  got dh ", got_dh);
+           mp_limb_trace ("  got dl ", got_dl);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ }
+@@ -95,7 +95,7 @@
+           mp_limb_trace ("  want dl", want_dl);
+           mp_limb_trace ("  got dh ", got_dh);
+           mp_limb_trace ("  got dl ", got_dl);
+-          abort ();
++          my_abort (__FILE__,__LINE__);
+         }
+     }
+ }

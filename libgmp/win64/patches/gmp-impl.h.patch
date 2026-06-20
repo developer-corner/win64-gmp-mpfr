@@ -1,0 +1,58 @@
+--- gmp-impl.h	2026-06-06 17:45:10.500526100 +0200
++++ gmp-impl.h	2026-06-06 17:45:54.622549200 +0200
+@@ -301,6 +301,10 @@
+   } while (0)
+ #endif
+ 
++#ifdef _MSC_VER
++#include <Windows.h>
++#endif
++
+ /* va_copy is standard in C99, and gcc provides __va_copy when in strict C89
+    mode.  Falling back to a memcpy will give maximum portability, since it
+    works no matter whether va_list is a pointer, struct or array.  */
+@@ -1389,23 +1394,24 @@
+    functions are recommended to applications which care about randomness, so
+    the old functions aren't too important.  */
+ 
+-__GMP_DECLSPEC extern char             __gmp_rands_initialized;
++__GMP_DECLSPEC extern volatile long    __gmp_rands_initialized;
+ __GMP_DECLSPEC extern gmp_randstate_t  __gmp_rands;
+ 
++#ifdef _MSC_VER
++# define __sync_fetch_and_or    InterlockedOr
++# define __sync_fetch_and_and   InterlockedAnd
++#endif
++
+ #define RANDS								\
+-  ((__gmp_rands_initialized ? 0						\
+-    : (__gmp_rands_initialized = 1,					\
+-       __gmp_randinit_mt_noseed (__gmp_rands), 0)),			\
++  ((__sync_fetch_and_or ( &__gmp_rands_initialized, -1L ) ? 0           \
++    : (__gmp_randinit_mt_noseed (__gmp_rands), 0)),                     \
+    __gmp_rands)
+ 
+ /* this is used by the test programs, to free memory */
+ #define RANDS_CLEAR()							\
+   do {									\
+-    if (__gmp_rands_initialized)					\
+-      {									\
+-	__gmp_rands_initialized = 0;					\
++    if (__sync_fetch_and_and ( &__gmp_rands_initialized, 0L ))          \
+ 	gmp_randclear (__gmp_rands);					\
+-      }									\
+   } while (0)
+ 
+ 
+@@ -3367,8 +3373,11 @@
+    bit 3, for instance with (((n + 2) & 4) << 1) ^ n.  */
+ 
+ #define binvert_limb_table  __gmp_binvert_limb_table
++
+ __GMP_DECLSPEC extern const unsigned char  binvert_limb_table[128];
+ 
++__GMP_DECLSPEC extern unsigned short __gmpn_invert_limb_table[256];
++
+ #define binvert_limb(inv,n)						\
+   do {									\
+     mp_limb_t  __n = (n);						\

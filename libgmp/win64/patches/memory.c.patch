@@ -1,0 +1,70 @@
+--- memory.c	2026-06-06 17:45:10.694843500 +0200
++++ memory.c	2026-06-06 17:46:03.835830800 +0200
+@@ -28,6 +28,8 @@
+ GNU Lesser General Public License along with the GNU MP Library.  If not,
+ see https://www.gnu.org/licenses/.  */
+ 
++#ifndef _WIN64
++
+ #include <stdio.h>
+ #include <stdlib.h> /* for malloc, realloc, free */
+ 
+@@ -143,3 +145,57 @@
+ #endif
+   free (blk_ptr);
+ }
++
++#else /* MS WINDOWS */
++
++#include <stdio.h>
++#include <stdlib.h> /* for malloc, realloc, free */
++
++#include "gmp-impl.h"
++
++void* (*__gmp_allocate_func) (size_t) = __gmp_default_allocate;
++void* (*__gmp_reallocate_func) (void*, size_t, size_t) = __gmp_default_reallocate;
++void   (*__gmp_free_func) (void*, size_t) = __gmp_default_free;
++
++/* Default allocation functions.  In case of failure to allocate/reallocate
++   an error message is written to stderr and the program aborts.  */
++
++void*
++__gmp_default_allocate(size_t size)
++{
++  void* ret = _aligned_malloc(size, 16);
++
++  if (0 == ret)
++  {
++    fprintf(stderr, "GNU MP: Cannot allocate memory (size=%lu)\n", (long)size);
++    exit(127);
++  }
++
++  return ret;
++}
++
++void*
++__gmp_default_reallocate(void* oldptr, size_t old_size, size_t new_size)
++{
++  void* ret;
++  //size_t max_size = new_size >= old_size ? new_size : old_size;
++
++  ret = _aligned_realloc(oldptr, new_size, 16);
++
++  if (0 == ret)
++  {
++    fprintf(stderr, "GNU MP: Cannot reallocate memory (old_size=%lu new_size=%lu)\n", (long)old_size, (long)new_size);
++    exit(127);
++  }
++
++  return ret;
++}
++
++void
++__gmp_default_free(void* blk_ptr, size_t blk_size)
++{
++  (void)blk_size;
++  _aligned_free(blk_ptr);
++}
++
++#endif /* of !_WIN64 */
+\ No newline at end of file

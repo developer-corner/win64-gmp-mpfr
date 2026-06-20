@@ -1,0 +1,416 @@
+diff -NaurbEZwB -x 'Makefile*' ./tune/sqr_basecase.c ./tune/sqr_basecase.c
+--- ./tune/sqr_basecase.c	1970-01-01 01:00:00.000000000 +0100
++++ ./tune/sqr_basecase.c	2026-06-06 17:46:07.322669400 +0200
+@@ -0,0 +1,2 @@
++/* not sure that an empty file can compile, so put in a dummy */
++int sqr_basecase_dummy;
+diff -NaurbEZwB -x 'Makefile*' ./tune/common.c ./tune/common.c
+--- ./tune/common.c	2026-06-06 17:45:34.978425800 +0200
++++ ./tune/common.c	2026-06-06 17:46:06.589816500 +0200
+@@ -328,7 +328,11 @@
+ 	    {
+ 	      printf ("dst");
+ 	      for (i = 0; i < s->dst_num; i++)
++#ifdef _WIN64
++    printf(" %016I64X", (unsigned __int64)s->dst[i].ptr);
++#else
+ 		printf (" %08lX", (unsigned long) s->dst[i].ptr);
++#endif
+ 	      printf (" ");
+ 	    }
+ 
+@@ -336,10 +340,18 @@
+ 	    {
+ 	      printf ("src");
+ 	      for (i = 0; i < s->src_num; i++)
++#ifdef _WIN64
++          printf(" %016I64X", (unsigned __int64)s->src[i].ptr);
++#else
+ 		printf (" %08lX", (unsigned long) s->src[i].ptr);
++#endif
+ 	      printf (" ");
+ 	    }
++#ifdef _WIN64
++    printf(" %016I64X", (unsigned __int64) &different);
++#else
+ 	  printf ("  (cf sp approx %08lX)\n", (unsigned long) &different);
++#endif
+ 
+ 	}
+ 
+diff -NaurbEZwB -x 'Makefile*' ./tune/freq.c ./tune/freq.c
+--- ./tune/freq.c	2026-06-06 17:45:35.092944800 +0200
++++ ./tune/freq.c	2026-06-06 17:46:06.786606000 +0200
+@@ -96,6 +96,9 @@
+ #include <sys/sysctl.h>  /* for sysctlbyname() */
+ #endif
+ 
++#ifdef _WIN64
++#include <unistd.h>
++#else
+ #if TIME_WITH_SYS_TIME
+ # include <sys/time.h>  /* for struct timeval */
+ # include <time.h>
+@@ -106,6 +109,7 @@
+ #  include <time.h>
+ # endif
+ #endif
++#endif
+ 
+ #if HAVE_SYS_RESOURCE_H
+ #include <sys/resource.h>  /* for struct rusage */
+diff -NaurbEZwB -x 'Makefile*' ./tune/time.c ./tune/time.c
+--- ./tune/time.c	2026-06-06 17:45:35.627517600 +0200
++++ ./tune/time.c	2026-06-06 17:46:07.347672000 +0200
+@@ -176,6 +176,9 @@
+ 
+ #include <sys/types.h>
+ 
++#ifdef _WIN64
++#include <time.h>
++#else
+ #if TIME_WITH_SYS_TIME
+ # include <sys/time.h>  /* for struct timeval */
+ # include <time.h>
+@@ -186,6 +189,7 @@
+ #  include <time.h>
+ # endif
+ #endif
++#endif
+ 
+ #if HAVE_SYS_MMAN_H
+ #include <sys/mman.h>      /* for mmap() */
+@@ -401,7 +405,9 @@
+ static struct_timespec  start_cgt;
+ static struct_rusage    start_grus;
+ static struct_timeval   start_gtod;
++#if HAVE_SYS_TIMES_H
+ static struct_tms       start_times;
++#endif
+ 
+ static double  cycles_limit = 1e100;
+ static double  mftb_unittime;
+@@ -580,7 +586,7 @@
+ #define MICROSECONDS_P(name, type, get, sec, usec)                      \
+   {                                                                     \
+     static int  result = -1;                                            \
+-    type      st, et;                                                   \
++    type      st = { 0 }, et = { 0 };                                   \
+     long      dt, half_tick;                                            \
+     unsigned  attempt, reps, i, j;                                      \
+ 									\
+@@ -669,6 +675,9 @@
+ int
+ getrusage_backwards_p (void)
+ {
++#ifdef _WIN64
++  return 0;
++#else
+   static int result = -1;
+   struct rusage  start, prev, next;
+   long  d;
+@@ -710,6 +719,7 @@
+     }
+ 
+   return result;
++#endif
+ }
+ 
+ /* CLOCK_PROCESS_CPUTIME_ID looks like it's going to be in a future version
+@@ -737,6 +747,9 @@
+ int
+ cgt_works_p (void)
+ {
++#ifdef _WIN64
++  return 0;
++#else
+   static int  result = -1;
+   struct_timespec  unit;
+ 
+@@ -815,6 +828,7 @@
+     }
+   result = 1;
+   return result;
++#endif
+ }
+ 
+ 
+@@ -1104,7 +1118,7 @@
+     }
+   else if (have_rrt)
+     {
+-      timebasestruct_t  t;
++      timebasestruct_t  t = { 0 };
+       use_rrt = 1;
+       DEFAULT (speed_precision, 10000);
+       read_real_time (&t, sizeof(t));
+@@ -1219,7 +1233,7 @@
+ void
+ grus_tick_boundary (void)
+ {
+-  struct_rusage  prev;
++  struct_rusage  prev = { 0 };
+   getrusage (0, &prev);
+   do {
+     getrusage (0, &start_grus);
+@@ -1239,11 +1253,13 @@
+ void
+ times_tick_boundary (void)
+ {
++#if HAVE_SYS_TIMES_H
+   struct_tms  prev;
+   times (&prev);
+   do
+     times (&start_times);
+   while (start_times.tms_utime == prev.tms_utime);
++#endif
+ }
+ 
+ 
+@@ -1270,6 +1286,7 @@
+ 	gettimeofday (&start_gtod, NULL);
+     }
+ 
++#ifndef _WIN64
+   if (have_times && use_times)
+     {
+       if (use_tick_boundary)
+@@ -1277,6 +1294,7 @@
+       else
+ 	times (&start_times);
+     }
++#endif
+ 
+   if (have_cgt && use_cgt)
+     clock_gettime (CGT_ID, &start_cgt);
+@@ -1419,15 +1437,17 @@
+   } while (0)
+ 
+   unsigned          end_cycles[2];
+-  stck_t            end_stck;
++  stck_t            end_stck = { 0 };
+   unsigned          end_mftb[2];
+   unsigned          end_sgi;
+-  timebasestruct_t  end_rrt;
+-  struct_timespec   end_cgt;
+-  struct_timeval    end_gtod;
+-  struct_rusage     end_grus;
++  timebasestruct_t  end_rrt = { 0 };
++  struct_timespec   end_cgt = { 0 };
++  struct_timeval    end_gtod = { 0 };
++  struct_rusage     end_grus = { 0 };
++#ifndef _WIN64
+   struct_tms        end_times;
+-  double            t_gtod, t_grus, t_times, t_cgt;
++#endif
++  double            t_gtod, t_grus, t_times = 0, t_cgt;
+   double            t_rrt, t_sgi, t_mftb, t_stck, t_cycles;
+   double            result;
+ 
+@@ -1442,7 +1462,9 @@
+   if (have_cgt    && use_cgt)     clock_gettime (CGT_ID, &end_cgt);
+   if (have_gtod   && use_gtod)    gettimeofday (&end_gtod, NULL);
+   if (have_grus   && use_grus)    getrusage (0, &end_grus);
++#ifndef _WIN64
+   if (have_times  && use_times)   times (&end_times);
++#endif
+ 
+   result = -1.0;
+ 
+@@ -1487,9 +1509,11 @@
+ 		(long) end_grus.ru_utime.tv_sec,
+ 		(long) end_grus.ru_utime.tv_usec);
+ 
++#ifndef _WIN64
+       if (use_times)
+ 	printf ("   times  %ld -> %ld\n",
+ 		start_times.tms_utime, end_times.tms_utime);
++#endif
+     }
+ 
+   if (use_rrt)
+@@ -1521,6 +1545,7 @@
+ 	}
+     }
+ 
++#ifndef _WIN64
+   if (use_times)
+     {
+       t_times = (end_times.tms_utime - start_times.tms_utime) * times_unittime;
+@@ -1535,6 +1560,7 @@
+ 	    END_EXCEED ("times()", t_times);
+ 	}
+     }
++#endif
+ 
+   if (use_gtod)
+     {
+diff -NaurbEZwB -x 'Makefile*' ./tune/tuneup.c ./tune/tuneup.c
+--- ./tune/tuneup.c	2026-06-06 17:45:35.652521900 +0200
++++ ./tune/tuneup.c	2026-06-06 17:46:07.484233000 +0200
+@@ -126,11 +126,12 @@
+ #include "tests.h"
+ #include "speed.h"
+ 
++#ifndef _WIN64
+ #if !HAVE_DECL_OPTARG
+ extern char *optarg;
+ extern int optind, opterr;
+ #endif
+-
++#endif
+ 
+ #define DEFAULT_MAX_SIZE   1000  /* limbs */
+ 
+@@ -523,7 +524,11 @@
+ 			   mp_size_t runner_up, double speedup)
+ {
+   char buf[100];
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++  snprintf(buf, sizeof(buf), "%.2f%% faster than %lld",
++#else
+   snprintf (buf, sizeof(buf), "%.2f%% faster than %ld",
++#endif
+ 	    100.0 * (speedup - 1), runner_up);
+   print_define_remark (name, value, buf);
+ }
+@@ -1069,7 +1074,11 @@
+ 
+ 	  if (option_trace >= 2)
+ 	    {
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++      printf("{%llu,%u}\n", prev_n1, best_k);
++#else
+ 	      printf ("{%lu,%u}\n", prev_n1, best_k);
++#endif
+ 	      fflush (stdout);
+ 	    }
+ 
+@@ -1260,7 +1269,11 @@
+ void
+ relspeed_div_1_vs_mul_1 (void)
+ {
++#ifdef _WIN64
++#define max_opsize  100
++#else
+   const size_t max_opsize = 100;
++#endif
+   mp_size_t n;
+   long j;
+   mp_limb_t rp[max_opsize];
+@@ -2064,8 +2077,13 @@
+   int k, i;
+   mp_size_t itch;
+   mp_bitcnt_t nbits, nbits_next, possible_nbits_cutoff;
++#ifdef _WIN64
++#define n_max          (3000 / GMP_NUMB_BITS)
++#define n_measurements 5
++#else
+   const int n_max = 3000 / GMP_NUMB_BITS;
+   const int n_measurements = 5;
++#endif
+   mp_ptr rp, bp, ep, mp, tp;
+   double ttab[n_measurements], tk, tkp1;
+   TMP_DECL;
+@@ -2922,6 +2940,17 @@
+     printf ("/* Generated by tuneup.c, %d-%02d-%02d, ",
+             tp->tm_year+1900, tp->tm_mon+1, tp->tm_mday);
+ 
++#ifdef _WIN64
++
++#define xstr(a) str(a)
++#define str(a) #a
++
++#define PRINTED_COMPILER "MS Visual C/C++ (64bit) MMNNBBBBB=" xstr(_MSC_FULL_VER) ", rev. " xstr(_MSC_BUILD)
++
++    printf("%s */\n", PRINTED_COMPILER);
++
++#else
++
+ #ifdef __GNUC__
+     /* gcc sub-minor version doesn't seem to come through as a define */
+     printf ("gcc %d.%d */\n", __GNUC__, __GNUC_MINOR__);
+@@ -2946,6 +2975,8 @@
+ #if ! defined (PRINTED_COMPILER)
+     printf ("system compiler */\n");
+ #endif
++
++#endif
+   }
+   printf ("\n");
+ 
+@@ -3033,6 +3064,67 @@
+   TMP_FREE;
+ }
+ 
++#ifdef _WIN64
++
++#ifndef _I_AM_IN_LIBMPFR
++
++int
++main(int argc, char* argv[])
++{
++  int  i;
++
++  /* Unbuffered so if output is redirected to a file it isn't lost if the
++     program is killed part way through.  */
++  setbuf(stdout, NULL);
++  setbuf(stderr, NULL);
++
++  for (i = 1; i < argc; i++)
++  {
++    if (!strcmp(argv[i], "-f"))
++    {
++      i++;
++      if (i == argc)
++      {
++        fprintf(stderr, "ERROR: Please specify fft max. size after '-f'.\n");
++        return 1;
++      }
++      option_fft_max_size = strtoul(argv[i], NULL, 10);
++    }
++    else
++    if (!strcmp(argv[i],"-t"))
++      option_trace++;
++    else
++    if (!strcmp(argv[i], "-o"))
++    {
++      i++;
++      if (i == argc)
++      {
++        fprintf(stderr, "ERROR: Please specify option after '-o'.\n");
++        return 1;
++      }
++      speed_option_set(argv[i]);
++    }
++    else
++    if (!strcmp(argv[i], "-p"))
++    {
++      i++;
++      if (i == argc)
++      {
++        fprintf(stderr, "ERROR: Please specify speed precision after '-p'.\n");
++        return 1;
++      }
++      speed_precision = atoi(argv[i]);
++    }
++  }
++
++  all();
++
++  return 0;
++}
++
++#endif /* of _I_AM_IN_LIBMPFR */
++
++#else
+ 
+ int
+ main (int argc, char *argv[])
+@@ -3070,3 +3162,5 @@
+   all ();
+   exit (0);
+ }
++
++#endif
+\ No newline at end of file

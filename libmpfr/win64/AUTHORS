@@ -1,0 +1,8 @@
+Authors of GNU MPFR MS Windows/64bit port (in chronological order of initial contribution)
+
+Ingo A. Kubbilun	
+			- small source code patches (MS Windows-specific)
+			- nmake Makefile
+			- module definition files for DLLs
+			- wintestrunner.c: execution and benchmarking of all tests
+			- creation of DLL version resource

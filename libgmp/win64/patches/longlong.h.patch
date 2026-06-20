@@ -1,0 +1,53 @@
+--- longlong.h	2026-06-06 17:45:10.606324000 +0200
++++ longlong.h	2026-06-06 17:45:54.674612200 +0200
+@@ -151,6 +151,26 @@
+    code to ensure the result is 0 when the input is 0, which we don't need
+    or want.  */
+ 
++#if defined(_MSC_VER) && defined(_LONG_LONG_LIMB)
++
++# ifdef _M_ARM64 
++/* the ARM64 'clz' instruction already returns the bit size = 64 if the input was zero,
++ * i.e. these two MS Visual C/C++ provided intrinsics can be used directly 
++ */
++#  define __builtin_clzll(x) _CountLeadingZeros64(x)
++#  define __builtin_ctzll(x) _CountTrailingZeros64(x)
++# else
++#  if defined(MPFR_HAVE_GMP_IMPL) && defined(__GMP_LIBGMP_DLL) /* included from libmpfr with DLL active */
++     __declspec(dllimport) extern unsigned int __builtin_clzll(unsigned __int64);
++     __declspec(dllimport) extern unsigned int __builtin_ctzll(unsigned __int64);
++#  else
++     __GMP_DECLSPEC extern unsigned int __builtin_clzll(unsigned __int64);
++     __GMP_DECLSPEC extern unsigned int __builtin_ctzll(unsigned __int64);
++#  endif
++# endif
++
++#endif
++
+ #ifdef _LONG_LONG_LIMB
+ #define count_leading_zeros_gcc_clz(count,x)	\
+   do {						\
+@@ -2237,6 +2257,23 @@
+ #define COUNT_LEADING_ZEROS_NEED_CLZ_TAB
+ #endif
+ 
++#if defined(_MSC_VER) && defined(_LONG_LONG_LIMB)
++
++// we DO NOT need this for MS Windows but the common.c in tune needs it...
++#ifndef COUNT_LEADING_ZEROS_NEED_CLZ_TAB
++#define COUNT_LEADING_ZEROS_NEED_CLZ_TAB
++#endif
++
++# undef count_leading_zeros
++# undef count_trailing_zeros
++# undef COUNT_LEADING_ZEROS_0
++
++# define count_leading_zeros(count,x) do { (count) = __builtin_clzll(x); } while (0)
++# define count_trailing_zeros(count,x) do { (count) = __builtin_ctzll(x); } while (0)
++# define COUNT_LEADING_ZEROS_0 64
++
++#endif
++
+ #ifdef COUNT_LEADING_ZEROS_NEED_CLZ_TAB
+ extern const unsigned char __GMP_DECLSPEC __clz_tab[129];
+ #endif

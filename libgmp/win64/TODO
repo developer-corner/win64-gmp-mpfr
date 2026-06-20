@@ -1,0 +1,13 @@
+2026-05-15	replace all occurrences of long, long int, 
+		signed long int, unsigned long, unsigned long int
+		by more generic 64bit integer types throughout
+		entire code base (not only libgmp but also libmpfr)
+
+		PLEASE NOTE: 'long' is 32bit in MS Visual C/C++ on
+		------------ 64bit system. '__int64' and 'long long'
+		are the same 64bit integer type.
+		'long long' in gcc/64bit is also 64bit, not 128bit.
+		(gcc comes with extra '__int128' for this)
+		intmax_t and uintmax_t are '__int64' types on MS
+		Windows.
+

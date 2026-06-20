@@ -1,0 +1,126 @@
+--- gmp-mpfr/mpfr-4.2.2/src/exceptions.c	2026-06-08 01:49:54.545074600 +0200
++++ libmpfr/src/exceptions.c	2026-06-08 01:46:55.699932600 +0200
+@@ -21,6 +21,10 @@
+ 
+ #include "mpfr-impl.h"
+ 
++#ifdef _WIN64
++static int dummy = 0;
++#endif
++
+ MPFR_THREAD_VAR (mpfr_flags_t, __gmpfr_flags, 0)
+ MPFR_THREAD_VAR (mpfr_exp_t, __gmpfr_emin, MPFR_EMIN_DEFAULT)
+ MPFR_THREAD_VAR (mpfr_exp_t, __gmpfr_emax, MPFR_EMAX_DEFAULT)
+--- gmp-mpfr/mpfr-4.2.2/src/mpfr-impl.h	2026-06-08 01:49:55.535305600 +0200
++++ libmpfr/src/mpfr-impl.h	2026-06-08 01:46:56.886834900 +0200
+@@ -27,6 +27,12 @@
+ # include "config.h"
+ #endif
+ 
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++#undef _MPFR_EXP_FORMAT
++#undef _MPFR_PREC_FORMAT
++#define _MPFR_EXP_FORMAT  4
++#define _MPFR_PREC_FORMAT 3
++#endif
+ 
+ /******************************************************
+  *****************  Standard headers  *****************
+@@ -2565,6 +2570,8 @@
+ # define MPFR_PREC_MAX_TEMP UINT_MAX
+ #elif _MPFR_PREC_FORMAT == 3
+ # define MPFR_PREC_MAX_TEMP ULONG_MAX
++#elif _MPFR_PREC_FORMAT == 4
++# define MPFR_PREC_MAX_TEMP ULLONG_MAX
+ #else
+ # error "Invalid MPFR Prec format"
+ #endif
+--- gmp-mpfr/mpfr-4.2.2/src/mpfr-longlong.h	2026-06-08 01:49:55.562314000 +0200
++++ libmpfr/src/mpfr-longlong.h	2026-06-08 02:20:24.867690300 +0200
+@@ -156,6 +156,26 @@
+    code to ensure the result is 0 when the input is 0, which we don't need
+    or want.  */
+ 
++#if defined(_MSC_VER) && defined(_LONG_LONG_LIMB)
++
++# ifdef _M_ARM64 
++/* the ARM64 'clz' instruction already returns the bit size = 64 if the input was zero,
++ * i.e. these two MS Visual C/C++ provided intrinsics can be used directly 
++ */
++#  define __builtin_clzll(x) _CountLeadingZeros64(x)
++#  define __builtin_ctzll(x) _CountTrailingZeros64(x)
++# else
++#  if defined(MPFR_HAVE_GMP_IMPL) && defined(__GMP_LIBGMP_DLL) /* included from libmpfr with DLL active */
++     __declspec(dllimport) extern unsigned int __builtin_clzll(unsigned __int64);
++     __declspec(dllimport) extern unsigned int __builtin_ctzll(unsigned __int64);
++#  else
++     __GMP_DECLSPEC extern unsigned int __builtin_clzll(unsigned __int64);
++     __GMP_DECLSPEC extern unsigned int __builtin_ctzll(unsigned __int64);
++#  endif
++# endif
++
++#endif
++
+ #ifdef _LONG_LONG_LIMB
+ #define count_leading_zeros_gcc_clz(count,x)	\
+   do {						\
+@@ -2242,6 +2262,20 @@
+ #define COUNT_LEADING_ZEROS_NEED_CLZ_TAB
+ #endif
+ 
++#if defined(_MSC_VER) && defined(_LONG_LONG_LIMB)
++
++#undef COUNT_LEADING_ZEROS_NEED_CLZ_TAB
++
++# undef count_leading_zeros
++# undef count_trailing_zeros
++# undef COUNT_LEADING_ZEROS_0
++
++# define count_leading_zeros(count,x) do { (count) = __builtin_clzll(x); } while (0)
++# define count_trailing_zeros(count,x) do { (count) = __builtin_ctzll(x); } while (0)
++# define COUNT_LEADING_ZEROS_0 64
++
++#endif
++
+ #ifdef COUNT_LEADING_ZEROS_NEED_CLZ_TAB
+ extern const unsigned char __MPFR_DECLSPEC __clz_tab[129];
+ #endif
+--- gmp-mpfr/mpfr-4.2.2/src/mpfr.h	2026-06-08 01:49:55.617813800 +0200
++++ libmpfr/src/mpfr.h	2026-06-08 01:46:56.979915700 +0200
+@@ -28,6 +28,13 @@
+ #define MPFR_VERSION_PATCHLEVEL 2
+ #define MPFR_VERSION_STRING "4.2.2"
+ 
++#if defined(_WIN64) && defined(_MP_SIZE_64BIT)
++#undef _MPFR_EXP_FORMAT
++#undef _MPFR_PREC_FORMAT
++#define _MPFR_EXP_FORMAT  4
++#define _MPFR_PREC_FORMAT 3
++#endif
++
+ /* User macros:
+    MPFR_USE_FILE:        Define it to make MPFR define functions dealing
+                          with FILE* (auto-detect).
+@@ -1130,6 +1139,11 @@
+ #define mpfr_get_z_exp mpfr_get_z_2exp
+ #define mpfr_custom_get_mantissa mpfr_custom_get_significand
+ 
++#ifdef _WIN64
++#define HAVE_MPFR_BUILD 1
++__MPFR_DECLSPEC extern const char* const mpfr_build;
++#endif /* _WIN64 */
++
+ #endif /* __MPFR_H */
+ 
+ 
+--- gmp-mpfr/mpfr-4.2.2/src/pow_ui.c	2026-06-08 01:49:55.823634900 +0200
++++ libmpfr/src/pow_ui.c	2026-06-08 01:46:57.277061500 +0200
+@@ -30,7 +30,7 @@
+ #endif
+ 
+ /* sets y to x^n, and return 0 if exact, non-zero otherwise */
+-int
++__MPFR_DECLSPEC int 
+ POW_U (mpfr_ptr y, mpfr_srcptr x, UTYPE n, mpfr_rnd_t rnd)
+ {
+   UTYPE m;

@@ -1,0 +1,5 @@
+2026-05-15	if mb_size_t (libgmp) is full 64bit, then
+		mpfr build is broken
+		maybe refactoring of mpfr to support 64bit prec
+		type also on MS Windows?
+

@@ -1,0 +1,8 @@
+The ENTIRE project (MS Windows port of libgmp) is licensed under the GPL.
+Please note that the C sources:
+
+  * src/colored_print.c
+  * src/create_version_resource.c
+  * src/wintestrunner.c
+
+RETAIN their MIT license, though.

@@ -1,0 +1,9 @@
+--- ./rand/rands.c	2026-06-06 17:45:31.669339200 +0200
++++ ./rand/rands.c	2026-06-06 17:46:03.450444200 +0200
+@@ -37,5 +37,5 @@
+ 
+ 
+ /* Use this via the RANDS macro in gmp-impl.h */
+-char             __gmp_rands_initialized = 0;
++volatile long    __gmp_rands_initialized = 0L;
+ gmp_randstate_t  __gmp_rands;
