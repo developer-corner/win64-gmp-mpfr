@@ -1,5 +1,0 @@
-objdump -d -M aliases,notes builtin.o
-
-armasm64 -nologo -g -machine ARM64 -o bitscan.obj bitscan.asm
-
--g für debug
